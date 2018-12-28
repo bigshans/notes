@@ -1,0 +1,133 @@
+#+TITLE: spring 入门笔记
+
+* Spring tutorial
+
+** Hello World Example
+
+   - ClassPathXmlApplicationContext
+
+     This API loads beans configuration file. It takes care of creating and initializing all the objects.
+
+   - ApplicationContext
+
+   - bean.xml
+
+     The bean.xml is used to assign unique IDs to different beans to control the creation of objects with different values without impacting any of Spring source files.
+
+     #+BEGIN_SRC xml
+       <bean id="helloWorld" class="com.tutorialspoint.HelloWorld">
+         <property name="message" value="Hello World!" />
+       </bean>
+     #+END_SRC
+** IoC Containers
+
+*** Spring BeanFactory Container
+
+    This is the simplest container providing the basic support for DI and is defined by the org.springframework.beans.factory.BeanFactory interface.
+
+    - XmlBeanFactory
+
+      This container reads the configuration metadata from an XML file and uses it to create a fully configured system or application.
+    - ClassPathResource
+
+      This API provide an interface to load the bean configuration.
+
+*** Spring ApplicationContext Container
+
+    The ApplicationContext is Spring's advance container.
+
+    - FileSystemXmlApplicationContext
+
+      This container loads the definitions of the beans from an XML file. Here you need provide full path of the XML file.
+    - ClassPathXmlApplicationContext
+
+      Same too. But here you don't need to provide the full path of the XML file.
+    - WebXmlApplicationContext
+
+      This container loads the XML file with definitions of all beans from within a web application.
+** Bean Definition
+   - class
+   - name
+   - scope
+   - constructor-arg
+   - properties
+   - autowiring mode
+   - lazy-initialization mode
+   - initialization method
+   - destruction method
+
+** Bean Scopes
+
+   #+BEGIN_SRC xml
+     <!-- A bean definition with singleton scope -->
+     <bean id = "..." class = "..." scope = "singleton">
+        <!-- collaborators and configuration for this bean go here -->
+     </bean>
+   #+END_SRC
+
+   - singleton
+
+     This scopes the bean definition to single instance per Spring Ioc container(default).
+
+   - prototype
+
+     This scopes a single bean definition to have any number of object instances.
+   - request
+
+     This scopes a bean definition to an HTTP request. Only valid in the context of a web-aware Spring ApplicationContext.
+   - session
+
+     Obviously, only valid int the context of a web-aware Sping ApplicationContext.
+   - global-session
+
+     Same too.
+** Life Cycle
+
+   - init method
+     - Initialzation callbacks
+       1. InitializingBean
+          #+BEGIN_SRC java
+            import org.springframework.beans.factory.InitializingBean
+            public class ExampleBean implements InitializingBean {
+                public void afterPropertiesSet() {
+                    // TODO
+                }
+            }
+          #+END_SRC
+       2. init-method
+          xml:
+          #+BEGIN_SRC xml
+            <bean id="exampleBean" class="exmples.ExampleBean" init-method="init" />
+          #+END_SRC
+          class definition:
+          #+BEGIN_SRC java
+            public class ExampleBean {
+                public void init() {
+                    // TODO
+                }
+            }
+          #+END_SRC
+   - destroy-method
+     - Destruction callbacks
+       1. DisposableBean
+          #+BEGIN_SRC java
+            import org.springframework.beans.factory.DisposableBean
+            public class ExampleBean implements DisposableBean {
+                public void destory(){
+                    // TODO
+                }
+            }
+          #+END_SRC
+       2. destroy-mode
+          xml:
+          #+BEGIN_SRC xml
+            <bean id = "exampleBean" class = "examples.ExampleBean" destroy-method = "destroy"/>
+          #+END_SRC
+          class definition:
+          #+BEGIN_SRC java
+            public class ExampleBean{
+                public void destroy(){
+                    // TODO
+                }
+            }
+          #+END_SRC
