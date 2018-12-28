@@ -131,3 +131,436 @@
                 }
             }
           #+END_SRC
+       3. registerShutdownHook()
+          
+          This method will ensure a graceful shutdown and call the relevant destroy methods. It is declared on AbstractApplicationContext class.
+
+** Post Processors
+
+   The BeanPostProcessor is an interface defined callback methods that you can implement to provide your own instantiation logic, dependency-resolution logic, etc. 
+
+   - postProcessBeforeInitialization()
+     
+     This method will be executed before bean init.
+   - postProcessAfterInitialization()
+     
+     This method will be executed after bean init but before bean destory.
+
+
+   When multiple BeanPostProcessor interfaces are confugured, the order you writing in your cofiguration file is the executing order you run it.
+
+** Definition Inheritance
+
+   When you use XML-based confugration metadata, you indicate a child bean definition by by using the parent attribute, specifying the parent bean as the value of this attribute.
+
+   #+BEGIN_SRC xml
+     <bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld">
+        <property name = "message1" value = "Hello World!"/>
+        <property name = "message2" value = "Hello Second World!"/>
+     </bean>
+
+     <bean id ="helloIndia" class = "com.tutorialspoint.HelloIndia" parent = "helloWorld">
+        <property name = "message1" value = "Hello India!"/>
+        <property name = "message3" value = "Namaste India!"/>
+     </bean>
+   #+END_SRC
+
+   - Bean Definition Templete
+
+     #+BEGIN_SRC xml
+       <!-- The parent bean cannot be instantiated because it is incomplete and it is also explicitly marked as abstract. -->
+       <bean id = "beanTeamplate" abstract = "true">
+         <property name = "message1" value = "Hello World!"/>
+         <property name = "message2" value = "Hello Second World!"/>
+         <property name = "message3" value = "Namaste India!"/>
+       </bean>
+
+       <bean id = "helloIndia" class = "com.tutorialspoint.HelloIndia" parent = "beanTeamplate">
+         <property name = "message1" value = "Hello India!"/>
+         <property name = "message3" value = "Namaste India!"/>
+       </bean>
+     #+END_SRC
+
+** Dependency Injection
+
+   - Constructor-based Depedency Injection
+     #+BEGIN_SRC xml
+       <!-- Definition for textEditor bean -->
+       <bean id = "textEditor" class = "com.tutorialspoint.TextEditor">
+          <constructor-arg ref = "spellChecker"/>
+       </bean>
+
+       <!-- Definition for spellChecker bean -->
+       <bean id = "spellChecker" class = "com.tutorialspoint.SpellChecker"></bean>
+     #+END_SRC
+
+     When your arguments more than one and they are not accordent:
+     #+BEGIN_SRC xml
+       <beans>
+
+          <bean id = "exampleBean" class = "examples.ExampleBean">
+             <constructor-arg type = "int" value = "2001"/>
+             <constructor-arg type = "java.lang.String" value = "Zara"/>
+          </bean>
+
+       </beans>
+     #+END_SRC
+
+     Or you can choose this:
+     #+BEGIN_SRC xml
+       <beans>
+
+          <bean id = "exampleBean" class = "examples.ExampleBean">
+             <constructor-arg index = "0" value = "2001"/>
+             <constructor-arg index = "1" value = "Zara"/>
+          </bean>
+
+       </beans>
+     #+END_SRC
+
+   - Setter-based Depedency Injection
+     #+BEGIN_SRC xml
+       <!-- Definition for textEditor bean -->
+       <bean id = "textEditor" class = "com.tutorialspoint.TextEditor">
+          <property name = "spellChecker" ref = "spellChecker"/>
+       </bean>
+
+       <!-- Definition for spellChecker bean -->
+       <bean id = "spellChecker" class = "com.tutorialspoint.SpellChecker"></bean>
+     #+END_SRC
+
+     - p-namespace
+
+       #+BEGIN_SRC xml
+         <?xml version = "1.0" encoding = "UTF-8"?>
+
+         <beans xmlns = "http://www.springframework.org/schema/beans"
+            xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation = "http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+            <bean id = "john-classic" class = "com.example.Person">
+               <property name = "name" value = "John Doe"/>
+               <property name = "spouse" ref = "jane"/>
+            </bean>
+
+            <bean name = "jane" class = "com.example.Person">
+               <property name = "name" value = "John Doe"/>
+            </bean>
+
+         </beans>
+       #+END_SRC
+       Instead of p-namespace:
+       #+BEGIN_SRC xml
+         <?xml version = "1.0" encoding = "UTF-8"?>
+
+         <beans xmlns = "http://www.springframework.org/schema/beans"
+            xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:p = "http://www.springframework.org/schema/p"
+            xsi:schemaLocation = "http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+            <bean id = "john-classic" class = "com.example.Person"
+               p:name = "John Doe"
+               p:spouse-ref = "jane"/>
+            </bean>
+
+            <bean name =" jane" class = "com.example.Person"
+               p:name = "John Doe"/>
+            </bean>
+
+         </beans>
+       #+END_SRC
+
+** Injecting Inner Beans
+
+   #+BEGIN_SRC xml
+     <?xml version = "1.0" encoding = "UTF-8"?>
+
+     <beans xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation = "http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+        <bean id = "outerBean" class = "...">
+           <property name = "target">
+              <bean id = "innerBean" class = "..."/>
+           </property>
+        </bean>
+
+     </beans>
+   #+END_SRC
+
+   Injecting the bean defined in other beans.
+
+** Injecting Collection
+
+   Following tag correspond to the corresponding collection:
+   - <list>
+   - <set>
+   - <map>
+   - <props>
+
+
+   #+BEGIN_SRC xml
+     <?xml version = "1.0" encoding = "UTF-8"?>
+
+     <beans xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation = "http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+        <!-- Definition for javaCollection -->
+        <bean id = "javaCollection" class = "com.tutorialspoint.JavaCollection">
+           
+           <!-- results in a setAddressList(java.util.List) call -->
+           <property name = "addressList">
+              <list>
+                 <value>INDIA</value>
+                 <value>Pakistan</value>
+                 <value>USA</value>
+                 <value>USA</value>
+              </list>
+           </property>
+
+           <!-- results in a setAddressSet(java.util.Set) call -->
+           <property name = "addressSet">
+              <set>
+                 <value>INDIA</value>
+                 <value>Pakistan</value>
+                 <value>USA</value>
+                 <value>USA</value>
+              </set>
+           </property>
+
+           <!-- results in a setAddressMap(java.util.Map) call -->
+           <property name = "addressMap">
+              <map>
+                 <entry key = "1" value = "INDIA"/>
+                 <entry key = "2" value = "Pakistan"/>
+                 <entry key = "3" value = "USA"/>
+                 <entry key = "4" value = "USA"/>
+              </map>
+           </property>
+           
+           <!-- results in a setAddressProp(java.util.Properties) call -->
+           <property name = "addressProp">
+              <props>
+                 <prop key = "one">INDIA</prop>
+                 <prop key = "one">INDIA</prop>
+                 <prop key = "two">Pakistan</prop>
+                 <prop key = "three">USA</prop>
+                 <prop key = "four">USA</prop>
+              </props>
+           </property>
+        </bean>
+
+     </beans>
+   #+END_SRC
+
+   Injectiing bean references:
+   #+BEGIN_SRC xml
+        <?xml version = "1.0" encoding = "UTF-8"?>
+
+     <beans xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation = "http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+        <!-- Bean Definition to handle references and values -->
+        <bean id = "..." class = "...">
+
+           <!-- Passing bean reference  for java.util.List -->
+           <property name = "addressList">
+              <list>
+                 <ref bean = "address1"/>
+                 <ref bean = "address2"/>
+                 <value>Pakistan</value>
+              </list>
+           </property>
+           
+           <!-- Passing bean reference  for java.util.Set -->
+           <property name = "addressSet">
+              <set>
+                 <ref bean = "address1"/>
+                 <ref bean = "address2"/>
+                 <value>Pakistan</value>
+              </set>
+           </property>
+           
+           <!-- Passing bean reference  for java.util.Map -->
+           <property name = "addressMap">
+              <map>
+                 <entry key = "one" value = "INDIA"/>
+                 <entry key = "two" value-ref = "address1"/>
+                 <entry key = "three" value-ref = "address2"/>
+              </map>
+           </property>
+        </bean>
+
+     </beans>
+   #+END_SRC
+
+   Injecting null and empty string values:
+   #+BEGIN_SRC xml
+     <bean id = "..." class = "exampleBean">
+        <property name = "email" value = ""/>
+     </bean>
+     <bean id = "..." class = "exampleBean">
+        <property name = "email"><null/></property>
+     </bean>
+   #+END_SRC
+** Auto-Wiring
+
+   - no
+
+     Default Setting.
+
+   - byName
+
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+          <!-- Definition for textEditor bean -->
+          <bean id = "textEditor" class = "com.tutorialspoint.TextEditor" autowire = "byName">
+             <property name = "name" value = "Generic Text Editor" />
+          </bean>
+
+          <!-- Definition for spellChecker bean -->
+          <bean id = "spellChecker" class = "com.tutorialspoint.SpellChecker"></bean>
+
+       </beans>
+     #+END_SRC
+     
+     When Spring container looks at the beans on which auto-wire attribute is set to byName, container will try to match and wire its properties with beans defined by the same names in confugration file.
+
+   - byType
+     #+BEGIN_SRC xml
+        <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+          <!-- Definition for textEditor bean -->
+          <bean id = "textEditor" class = "com.tutorialspoint.TextEditor" autowire = "byType">
+             <property name = "name" value = "Generic Text Editor" />
+          </bean>
+
+          <!-- Definition for spellChecker bean -->
+          <bean id = "SpellChecker" class = "com.tutorialspoint.SpellChecker"></bean>
+
+       </beans>    
+     #+END_SRC
+     When the bean's attribute is set to byType, Spring Container will try to match and wire a property if its type matches with exactly one of the beans name in configuration file.
+
+   - constructor
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+          <!-- Definition for textEditor bean -->
+          <bean id = "textEditor" class = "com.tutorialspoint.TextEditor" 
+             autowire = "constructor">
+             <constructor-arg value = "Generic Text Editor"/>
+          </bean>
+
+          <!-- Definition for spellChecker bean -->
+          <bean id = "SpellChecker" class = "com.tutorialspoint.SpellChecker"></bean>
+
+       </beans>
+     #+END_SRC
+     This mode is very similar to byType, but it applies to constructor arguments.
+
+   - autodect
+
+     This mode will try constructor mode first, if it doesn't work, Spring will try to autowire by byType.
+** Annotation Based Configuration
+
+   Spring can use annatations to confugre the dependency injection from version 2.5 . If you want to enable annotation configuration, cosidering the following configuration file.
+   #+BEGIN_SRC xml
+     <?xml version = "1.0" encoding = "UTF-8"?>
+
+     <beans xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context = "http://www.springframework.org/schema/context"
+        xsi:schemaLocation = "http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+        <context:annotation-config/>
+        <!-- bean definitions go here -->
+
+     </beans> 
+   #+END_SRC
+
+   - @Required
+
+     This annotation applies to bean property setter method. Once you use it, you must configure this property in XML file.
+
+     Here is the content of Student.java file -
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.beans.factory.annotation.Required;
+
+       public class Student {
+           private Integer age;
+           private String name;
+
+           @Required
+           public void setAge(Integer age) {
+               this.age = age;
+           }
+           public Integer getAge() {
+               return age;
+           }
+
+           @Required
+           public void setName(String name) {
+               this.name = name;
+           }
+           public String getName() {
+               return name;
+           }
+       }
+     #+END_SRC
+
+     Here is your bean.xml -
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context = "http://www.springframework.org/schema/context"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+          <context:annotation-config/>
+
+          <!-- Definition for student bean -->
+          <!-- Even one propery you don't confugre here, the application will throw BeanCreationException -->
+          <bean id = "student" class = "com.tutorialspoint.Student">
+             <property name = "name" value = "Zara" />
+             <property name = "age"  value = "11"/>
+          </bean>
+
+       </beans>
+
+     #+END_SRC
+
+   - @Autowired
+     
