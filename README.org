@@ -1,0 +1,10 @@
+#+TITLE: 学习笔记
+
+* INTRUCTION
+  这是我的个人笔记。主要是我的读书笔记和其他学习中的一些笔记。
+
+  Here is my personal note respository. The main of the notes are from my reading or other studying experience.
+
+* INDEX
+
+  - [[./study/spring.org][spring.org]] (Spring framework study notes)
