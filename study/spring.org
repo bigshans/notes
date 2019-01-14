@@ -563,4 +563,440 @@
      #+END_SRC
 
    - @Autowired
+
+     You can use @Autowired annotation on setter methods to get rid of the <propery> element in XML configuration file. Spring set methods perform byType.
      
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.beans.factory.annotation.Autowired;
+
+       public class TextEditor {
+           private SpellChecker spellChecker;
+
+           @Autowired
+           public void setSpellChecker( SpellChecker spellChecker ){
+               this.spellChecker = spellChecker;
+           }
+           public SpellChecker getSpellChecker( ) {
+               return spellChecker;
+           }
+           public void spellCheck() {
+               spellChecker.checkSpelling();
+           }
+       }
+     #+END_SRC
+
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context = "http://www.springframework.org/schema/context"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd">
+
+          <context:annotation-config/>
+
+          <!-- Definition for textEditor bean without constructor-arg  -->
+          <bean id = "textEditor" class = "com.tutorialspoint.TextEditor">
+          </bean>
+
+          <!-- Definition for spellChecker bean -->
+          <bean id = "spellChecker" class = "com.tutorialspoint.SpellChecker">
+          </bean>
+
+       </beans>
+     #+END_SRC
+     
+     You can use it in constructor as well. Here :
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.beans.factory.annotation.Autowired;
+
+       public class TextEditor {
+           private SpellChecker spellChecker;
+
+           @Autowired
+           public TextEditor(SpellChecker spellChecker){
+               System.out.println("Inside TextEditor constructor." );
+               this.spellChecker = spellChecker;
+           }
+           public void spellCheck(){
+               spellChecker.checkSpelling();
+           }
+       }
+     #+END_SRC
+
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context = "http://www.springframework.org/schema/context"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd">
+
+          <context:annotation-config/>
+
+          <!-- Definition for textEditor bean without constructor-arg  -->
+          <bean id = "textEditor" class = "com.tutorialspoint.TextEditor">
+          </bean>
+
+          <!-- Definition for spellChecker bean -->
+          <bean id = "spellChecker" class = "com.tutorialspoint.SpellChecker">
+          </bean>
+
+       </beans>
+     #+END_SRC
+     
+     By default, the @Autowired annotation implies the dependency is required similar to @Required annotation, however, you can turn off the default behavior by using (required=false) option whith @Autowired.
+     
+     #+BEGIN_SRC java
+
+       package com.tutorialspoint;
+
+       import org.springframework.beans.factory.annotation.Autowired;
+
+       public class Student {
+           private Integer age;
+           private String name;
+
+           @Autowired(required=false)
+           public void setAge(Integer age) {
+               this.age = age;
+           }
+           public Integer getAge() {
+               return age;
+           }
+   
+           @Autowired
+           public void setName(String name) {
+               this.name = name;
+           }
+           public String getName() {
+               return name;
+           }
+       }
+     #+END_SRC
+     
+   - @Qualifier
+
+     There be a situation when you create more than one bean of the same type and want to wire only one of them with a property.
+
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       public class Student {
+           private Integer age;
+           private String name;
+
+           public void setAge(Integer age) {
+               this.age = age;
+           }
+           public Integer getAge() {
+               return age;
+           }
+           public void setName(String name) {
+               this.name = name;
+           }
+           public String getName() {
+               return name;
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:context = "http://www.springframework.org/schema/context"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+          <context:annotation-config/>
+
+          <!-- Definition for profile bean -->
+          <bean id = "profile" class = "com.tutorialspoint.Profile"></bean>
+
+          <!-- Definition for student1 bean -->
+          <bean id = "student1" class = "com.tutorialspoint.Student">
+             <property name = "name" value = "Zara" />
+             <property name = "age" value = "11"/>
+          </bean>
+
+          <!-- Definition for student2 bean -->
+          <bean id = "student2" class = "com.tutorialspoint.Student">
+             <property name = "name" value = "Nuha" />
+             <property name = "age" value = "2"/>
+          </bean>
+
+       </beans>
+     #+END_SRC
+     
+   - JSR-250
+     * @PostConstruct and @PreDestroy
+
+     * @Resource Annotation (search byName)
+
+       #+BEGIN_SRC java
+         package com.tutorialspoint;
+
+         import javax.annotation.Resource;
+
+         public class TextEditor {
+             private SpellChecker spellChecker;
+
+             @Resource(name = "spellChecker")
+             public void setSpellChecker( SpellChecker spellChecker ){
+                 this.spellChecker = spellChecker;
+             }
+             public SpellChecker getSpellChecker(){
+                 return spellChecker;
+             }
+             public void spellCheck(){
+                 spellChecker.checkSpelling();
+             }
+         }
+       #+END_SRC
+       
+** Java Based Configuration
+
+   - @Configuration & @Bean Annotations
+
+     @Configuration indicates that the class can be used by the Spring IoC container as source of bean definitions.
+
+     @Bean tells Spring that a method annotated with @Bean will return an object that should be registered as a bean in the Spring application context.
+
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+       import org.springframework.context.annotation.*;
+
+       @Configuration
+       public class HelloWorldConfig {
+           @Bean 
+           public HelloWorld helloWorld(){
+               return new HelloWorld();
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC xml
+       <beans>
+          <bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld" />
+       </beans>
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       public static void main(String[] args) {
+           ApplicationContext ctx = new AnnotationConfigApplicationContext(HelloWorldConfig.class);
+   
+           HelloWorld helloWorld = ctx.getBean(HelloWorld.class);
+           helloWorld.setMessage("Hello World!");
+           helloWorld.getMessage();
+       }
+     #+END_SRC
+     
+     Other version:
+     #+BEGIN_SRC java
+       public static void main(String[] args) {
+           AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+
+           ctx.register(AppConfig.class, OtherConfig.class);
+           ctx.register(AdditionalConfig.class);
+           ctx.refresh();
+
+           MyService myService = ctx.getBean(MyService.class);
+           myService.doStuff();
+       }
+     #+END_SRC
+
+   - @Import
+
+     The @Import annotation allows for loading @Bean definitions from another configuration class.
+
+     I think the behavior like inheritance.
+     
+     #+BEGIN_SRC java
+       @Configuration
+       public class ConfigA {
+           @Bean
+           public A a() {
+               return new A(); 
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       @Configuration
+       @Import(ConfigA.class)
+       public class ConfigB {
+           @Bean
+           public B a() {
+               return new A(); 
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       public static void main(String[] args) {
+           ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigB.class);
+   
+           // now both beans A and B will be available...
+           A a = ctx.getBean(A.class);
+           B b = ctx.getBean(B.class);
+       }
+     #+END_SRC
+
+   - Lifecycle Callbacks
+
+     Like xml tags configuration.
+
+     #+BEGIN_SRC java
+       public class Foo {
+           public void init() {
+               // initialization logic
+           }
+           public void cleanup() {
+               // destruction logic
+           }
+       }
+       @Configuration
+       public class AppConfig {
+           @Bean(initMethod = "init", destroyMethod = "cleanup" )
+           public Foo foo() {
+               return new Foo();
+           }
+       }
+     #+END_SRC
+     
+   - Specifying Bean Scope
+
+     #+BEGIN_SRC java
+       @Configuration
+       public class AppConfig {
+           @Bean
+           @Scope("prototype")
+           public Foo foo() {
+               return new Foo();
+           }
+       }
+     #+END_SRC
+ 
+** Event Handing in Spring
+
+   - ApplicationEvent
+
+     - ContextRefreshedEvent
+
+       Called when the ApplicationContext is initialized or refreshed.
+
+     - ContextStartedEvent
+
+       Called when the ApplicationContext is started.
+
+     - ContextStoppedEvent
+
+       Called when the ApplicationContext is stopped.
+      
+     - ContextClosedEvent
+
+       Called when the ApplicationContext is closed.
+
+     - RequestHandledEvent
+
+       Using a web-specific event.
+
+   - Listening to Context Events
+
+     Implementing onApplicationEvent.
+     
+   - Custom Events
+
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.context.ApplicationEvent;
+
+       public class CustomEvent extends ApplicationEvent{
+           public CustomEvent(Object source) {
+               super(source);
+           }
+           public String toString(){
+               return "My Custom Event";
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.context.ApplicationEventPublisher;
+       import org.springframework.context.ApplicationEventPublisherAware;
+
+       public class CustomEventPublisher implements ApplicationEventPublisherAware {
+           private ApplicationEventPublisher publisher;
+   
+           public void setApplicationEventPublisher (ApplicationEventPublisher publisher) {
+               this.publisher = publisher;
+           }
+           public void publish() {
+               CustomEvent ce = new CustomEvent(this);
+               publisher.publishEvent(ce);
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.context.ApplicationListener;
+
+       public class CustomEventHandler implements ApplicationListener<CustomEvent> {
+           public void onApplicationEvent(CustomEvent event) {
+               System.out.println(event.toString());
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC java
+       package com.tutorialspoint;
+
+       import org.springframework.context.ConfigurableApplicationContext;
+       import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+       public class MainApp {
+           public static void main(String[] args) {
+               ConfigurableApplicationContext context = 
+                   new ClassPathXmlApplicationContext("Beans.xml");
+	  
+               CustomEventPublisher cvp = 
+                   (CustomEventPublisher) context.getBean("customEventPublisher");
+      
+               cvp.publish();  
+               cvp.publish();
+           }
+       }
+     #+END_SRC
+     
+     #+BEGIN_SRC xml
+       <?xml version = "1.0" encoding = "UTF-8"?>
+
+       <beans xmlns = "http://www.springframework.org/schema/beans"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+          <bean id = "customEventHandler" class = "com.tutorialspoint.CustomEventHandler"/>
+          <bean id = "customEventPublisher" class = "com.tutorialspoint.CustomEventPublisher"/>
+
+       </beans>
+     #+END_SRC
