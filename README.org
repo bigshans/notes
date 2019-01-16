@@ -8,3 +8,4 @@
 * INDEX
 
   - [[./study/spring.org][spring.org]] (Spring framework study notes)
+  - [[./git.org][git.org]] (Some knowledge about git)
