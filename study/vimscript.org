@@ -1,0 +1,35 @@
+#+TITLE: Vimscript 学习笔记
+
+* 设置选项
+
+** 布尔选项
+
+   - number
+     显示行号
+     #+BEGIN_SRC evil
+       set number  " 设置行号
+       set number! " 切换显示行号
+       set number? " 显示当前行号显示状态
+     #+END_SRC
+   - wrap
+     是否折行
+   - shiftround
+     缩进取整到 'shiftwidth' 的倍数
+   - matchtime
+     显示配对括号的时间
+
+* leaders
+
+* <leader>
+
+  :let mapleader=" "
+
+  设置 leader 键。
+
+  :let maplocalleader=","
+
+  设置 localleader 键。
+  
+* abbreviations
+
+  缩写可被用于 insert，command 和 replace mode。
