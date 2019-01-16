@@ -1,0 +1,105 @@
+#+TITLE: git 学习笔记
+
+* git 分支管理
+** bug 分支管理
+
+   #+BEGIN_SRC sh
+     git status #查看当前状态
+     git stash # 保存当前工作现场
+     git checkout master
+     git checkout -b issue-101
+     # Do Something fix bug
+     git add .
+     git commit -m 'fix bug 101'
+     git checkout master
+     git merge --no-ff -m 'merge bug fix 101' issue-101
+     # --no-ff 不使用 fast-forward 方式合并，保留分支的 commit 历史
+     # --squash 使用 squash 方式合并，把多次分支 commit 历史压缩为一次
+     # fast-forward 在分支被删除后会对视分支信息
+     git branch -d issue-101 # 删除分支
+     git checkout dev
+     git stash list # 查看之前 stash 保存的内容
+     git stash apply stash@{0} # 恢复指定 stash 内容
+   #+END_SRC
+   
+** feature 分支管理
+
+   #+BEGIN_SRC sh
+     git checkout -b feature-vulcan # 创建 feature 分支
+     # Do something deveolp
+     git checkout dev
+     git merge --squash feature-vulcan # 合并分支
+     git branch -D feature-vulcan # 强制删除，可以删除一个未合并过的分支
+   #+END_SRC
+   
+** 分支的创建与合并
+
+   #+BEGIN_SRC sh
+     git checkout -b dev # 创建并转到 dev 分支
+     git branch dev # 创建 dev 分支
+     git checkout dev # 跳转到 dev 分支
+     git branch # 查看当前有几条分支
+     git merge master # 合并分支
+   #+END_SRC
+   
+** 解决冲突
+   
+   #+BEGIN_SRC sh
+     git merge feature1 # 假设我们冲突了无法快速合并
+     git status # 查看状态，可以查看冲突
+     # Do something solve the conflict
+     # Git 用<<<<<<<，=======，>>>>>>>标记出不同分支的内容
+     git add .
+     git commit -m "conflict fixed" # 提交解决
+   #+END_SRC
+   
+** 多人协作
+
+   #+BEGIN_SRC sh
+     git remote # 查看远程库信息
+     git remote -v # 查看更为详细的远程库信息
+     git push origin master # 推送 master 分支到 origin 远程库
+     git pull # 拉取源远程库
+     git branch --set-upstream-to=origin/dev dev
+     # 设置本地库与远程库 dev 分支，往往是由于本地或远程没有对应分支
+     # 如何 git pull 有冲突，请解决冲突，解决方法与之前一样
+     # 解决后再提交推送远程库
+   #+END_SRC
+
+** rebase
+   
+   #+BEGIN_SRC sh
+     git checkout feature
+     git rebase master
+     # rebase 将整个 feature 分支移动到 master 分支后面
+     # 有效地把所有 master 分支上新的提交并入过来
+     # 但是，rebase 为原分支上每一个提交创建一个新的提交，重写了项目历史，并且不会带来合并提交
+     git rebase --continue
+     # 解决冲突后，继续执行 rebase，若要取消，则用 --abort 选项
+     git checkout master
+     git merge feature
+     # rebase 后要回到 master，由于主线此时落后 feature 分支，所以要快速合并一下。
+   #+END_SRC
+
+* git 版本暂存管理
+** 版本回退
+
+   #+BEGIN_SRC sh
+     git log # 查看提交
+     git log --graph --pretty=oneline --abbrev-commit # 更好的查看
+     git reset --hard HEAD^ # 回退到上一个版本，^ 的个数是回退的个数
+     git reset --hard <commit id> # 到某个版本去，可以回退也可以前进
+     git reset HEAD~2 # 回退倒数两个版本，修改的地方放到了暂存区中
+     git reflog # 查看命令记录
+   #+END_SRC
+   
+   #+BEGIN_SRC sh
+     git revert HEAD # 撤销最近一次提交
+     # revert 会创建一个提交去撤销提交，会出现在提交历史里
+     git revert HEAD~2 # 回退到倒数第二个版本
+   #+END_SRC
+   
+   #+BEGIN_SRC sh
+     git checkout HEAD~2 # 移动到倒数第二个版本
+     # 这里如果提交的话，会造成之前提交的丢失，所以要做修改最好开一个新的分支
+   #+END_SRC
