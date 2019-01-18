@@ -1,0 +1,125 @@
+#+TITLE: typescript 学习笔记
+
+* Hello World
+
+  hello.ts:
+  #+BEGIN_SRC typescript
+    function sayHello(person: String) {
+        return 'Hello, ' + person;
+    }
+
+    let user = 'Tom';
+    console.log(sayHello(user));
+  #+END_SRC
+  
+  #+BEGIN_SRC sh
+    tsc hello.ts
+  #+END_SRC
+  
+  然后会生成一个 hello.js。
+
+  typescript 使用 : 指定变量类型。
+
+  typescript 只会进行静态检查，如果发现错误，编译的时候就会报错。但还是会生成 js 文件。
+
+  如果想要报错不生成，则要在 tsconfig.json 中配置 noEmitOnErrir 即可。
+  
+  #+BEGIN_SRC json
+    {
+        "compilerOptions": {
+            "noEmitOnError": true,
+        },
+        "files": [
+            "hello.ts"
+        ]
+    }
+  #+END_SRC
+
+* 基础类型
+  
+  - 布尔型
+
+    #+BEGIN_SRC typescript
+      let isDonw: boolean = false;
+    #+END_SRC
+    
+    Boolean 不是 boolean，一下代码无法通过编译。
+
+    #+BEGIN_SRC typescript
+      let createByBoolean: boolean = new Boolean(1);
+    #+END_SRC
+    
+    应该这样:
+    #+BEGIN_SRC typescript 
+      let createByBoolean: Boolean = new Boolean(1);
+    #+END_SRC
+    
+    不过也可以这样：
+    #+BEGIN_SRC typescript
+      let createdByBoolean: boolean = Boolean(1);
+    #+END_SRC
+    
+    - 数值
+
+      #+BEGIN_SRC typescript
+        let decDig: number = 6;
+        let hexDig: number = 0xf00d;
+        let binDig: number = 0b1010;
+        let octDig: number = 0o744;
+        let notNumberL: number = NaN;
+        let infinity: number = Infinity;
+      #+END_SRC
+      
+      结果为：
+      #+BEGIN_SRC javascript
+        var decDig = 6;
+        var hexDig = 0xf00d;
+        var binDig = 10;
+        var octDig = 484;
+        var notNumberL = NaN;
+        var infinity = Infinity;
+      #+END_SRC
+      
+      其中的二进制和八进制被编译成十进制。
+      
+    - 字符串
+
+      #+BEGIN_SRC typescript
+        let myName: string = 'Tom';
+        let myAge: number = 25;
+        let sentence: string = `Hello, my name is ${myName}.
+        I'll be ${myAge + 1} years old next month.`;
+      #+END_SRC
+      
+      结果:
+      #+BEGIN_SRC javascript
+        var myName = 'Tom';
+        var myAge = 25;
+        var sentence = "Hello, my name is " + myName + ".\nI'll be " + (myAge + 1) + " years old next month.";
+      #+END_SRC
+      
+      其中， ` 用来定义 es 6 中的模板字符串，${expr} 用来在模板字符串中嵌入表达式。
+      
+    - 空值
+
+      void 表示没有任何返回值的函数。
+
+      #+BEGIN_SRC typescript
+        function alertName(): void {
+            alert('My name is Tom');
+        }
+      #+END_SRC
+      
+      可以声明一个 void 类型变量。只能赋值 null 和 undefined。
+      #+BEGIN_SRC typescript
+        let unusable: void = undefined;
+      #+END_SRC
+      
+      - Null 和 Undefined
+
+        #+BEGIN_SRC typescript
+          let u: undefined = undefined;
+          let n: null = null;
+        #+END_SRC
+        
+        undefined 和 null 是所有类型的子类型，可以赋值给其他类型，但 void 不行。
