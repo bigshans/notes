@@ -59,48 +59,48 @@
       let createdByBoolean: boolean = Boolean(1);
     #+END_SRC
     
-    - 数值
+  - 数值
 
-      #+BEGIN_SRC typescript
-        let decDig: number = 6;
-        let hexDig: number = 0xf00d;
-        let binDig: number = 0b1010;
-        let octDig: number = 0o744;
-        let notNumberL: number = NaN;
-        let infinity: number = Infinity;
-      #+END_SRC
+    #+BEGIN_SRC typescript
+      let decDig: number = 6;
+      let hexDig: number = 0xf00d;
+      let binDig: number = 0b1010;
+      let octDig: number = 0o744;
+      let notNumberL: number = NaN;
+      let infinity: number = Infinity;
+    #+END_SRC
       
-      结果为：
-      #+BEGIN_SRC javascript
-        var decDig = 6;
-        var hexDig = 0xf00d;
-        var binDig = 10;
-        var octDig = 484;
-        var notNumberL = NaN;
-        var infinity = Infinity;
-      #+END_SRC
+    结果为：
+    #+BEGIN_SRC javascript
+      var decDig = 6;
+      var hexDig = 0xf00d;
+      var binDig = 10;
+      var octDig = 484;
+      var notNumberL = NaN;
+      var infinity = Infinity;
+    #+END_SRC
       
-      其中的二进制和八进制被编译成十进制。
+    其中的二进制和八进制被编译成十进制。
       
-    - 字符串
+  - 字符串
 
-      #+BEGIN_SRC typescript
-        let myName: string = 'Tom';
-        let myAge: number = 25;
-        let sentence: string = `Hello, my name is ${myName}.
-        I'll be ${myAge + 1} years old next month.`;
-      #+END_SRC
+    #+BEGIN_SRC typescript
+      let myName: string = 'Tom';
+      let myAge: number = 25;
+      let sentence: string = `Hello, my name is ${myName}.
+      I'll be ${myAge + 1} years old next month.`;
+    #+END_SRC
       
-      结果:
-      #+BEGIN_SRC javascript
-        var myName = 'Tom';
-        var myAge = 25;
-        var sentence = "Hello, my name is " + myName + ".\nI'll be " + (myAge + 1) + " years old next month.";
-      #+END_SRC
+    结果:
+    #+BEGIN_SRC javascript
+      var myName = 'Tom';
+      var myAge = 25;
+      var sentence = "Hello, my name is " + myName + ".\nI'll be " + (myAge + 1) + " years old next month.";
+    #+END_SRC
       
-      其中， ` 用来定义 es 6 中的模板字符串，${expr} 用来在模板字符串中嵌入表达式。
+    其中， ` 用来定义 es 6 中的模板字符串，${expr} 用来在模板字符串中嵌入表达式。
       
-    - 空值
+  - 空值
 
       void 表示没有任何返回值的函数。
 
@@ -115,11 +115,249 @@
         let unusable: void = undefined;
       #+END_SRC
       
-      - Null 和 Undefined
+  - Null 和 Undefined
 
-        #+BEGIN_SRC typescript
-          let u: undefined = undefined;
-          let n: null = null;
-        #+END_SRC
+    #+BEGIN_SRC typescript
+      let u: undefined = undefined;
+      let n: null = null;
+    #+END_SRC
         
-        undefined 和 null 是所有类型的子类型，可以赋值给其他类型，但 void 不行。
+    undefined 和 null 是所有类型的子类型，可以赋值给其他类型，但 void 不行。
+
+  - Any
+
+    Any 用来表示允许赋值为任意类型。
+
+    普通类型在赋值过程中不允许改变类型， 但 Any 允许被赋值为任意类型。
+
+    #+BEGIN_SRC typescript
+      let myFaviroteNumber: any = 'seven';
+      myFavoriteNumber = 7;
+    #+END_SRC
+
+    在任意值上访问任何属性都是允许的，也允许调用任何方法。
+
+    #+BEGIN_SRC typescript
+      let anyThing: any = 'Tom';
+      console.log(anyThing.myName);
+      console.log(anyThing.myName.firstName);
+      anyThing.setName('Jerry');
+      anyThing.setName('Jerry').sayHello();
+      anyThing.myName.setFirstName('Cat');
+    #+END_SRC
+
+    声明一个变量为任意值之后对它的任何操作，返回的内容类型都是任意值。
+
+    未声明类型的变量，其类型为任意值。
+        
+  - 联合类型
+
+    #+BEGIN_SRC typescript
+      let myFavoriteNumber: string | number;
+      myFavoriteNumber = 'seven';
+      myFavoriteNumber = 7;
+      let myFavoriteNumber: string | number;
+      myFavoriteNumber = true;
+    #+END_SRC
+        
+    联合类型使用 | 分割每个类型。
+
+    这里 =let myFavoriteNumber: string | number= 的含义是允许 =myFavoriteNumber= 的类型为 =string= 或者是 =number= 。
+
+    当 ts 无法确定一个联合类型的变了到底是那个类型时，我们 *只能访问此联合类型里共有的属性或方法* 。
+
+    #+BEGIN_SRC typescript
+      function getLength(something: string | number): number {
+          return something.length;
+      } // 会报错
+    #+END_SRC
+        
+    #+BEGIN_SRC typescript
+      function getString(something: string | number): string {
+          return something.toString();
+      } //访问共有属性是没有问题的
+    #+END_SRC
+        
+    联合类型的变量在被赋值的时候，会根据类型推论的规则推断处一个类型：
+
+    #+BEGIN_SRC typescript
+      let myFavoriteNumber: string | number;
+      myFavoriteNumber = 'seven';
+      console.log(myFavoriteNumber.length); // 5
+      myFavoriteNumber = 7;
+      console.log(myFavoriteNumber.length);
+    #+END_SRC
+
+*** 类型推论
+
+    以下代码虽然没有指定类型，但会在编译的时候报错：
+
+    #+BEGIN_SRC typescript
+      let myFavoriteNumber = 'seven';
+      myFavoriteNumber = 7;
+    #+END_SRC
+    
+    实际等价于：
+
+    #+BEGIN_SRC typescript
+      let myFavoriteNumber: string = 'seven';
+      myFavoriteNumber = 7;
+    #+END_SRC
+
+    ts 会在没有明确指定类型的时候推测处一个类型。
+
+    如果定义时没有赋值，就会被定义称为 Any，而不进行类型检查。
+* 数组
+
+  #+BEGIN_SRC typescript
+    let fib: number[] = [1, 2, 3]
+  #+END_SRC
+  
+  数组一旦定义就不允许传入其他类型。
+
+** 数组泛型
+
+   #+BEGIN_SRC typescript
+     let fib: Array<number> = [1, 2 ,3]
+   #+END_SRC
+   
+   使用泛型 Array<type> 来定义一个数组。
+   
+** 用接口表示数组
+
+   #+BEGIN_SRC typescript
+     interface NumberArray {
+         [index: number]: number;
+     }
+     let fibonacci: NumberArray = [1, 1, 2, 3, 5];
+   #+END_SRC
+   
+** any 在数组中
+
+   #+BEGIN_SRC typescript
+     let list: any[] = ['Xcat Liu', 25, { website: 'http://xcatliu.com' }];
+   #+END_SRC
+   
+   这样就允许出现任意类型。
+   
+** 类数组
+   
+   类数组不是数组，无法被赋值给一个数组。
+
+   类数组有自己的接口定义。
+
+   #+BEGIN_SRC typescript
+     function sum() {
+         let args: IArguments = arguments;
+     }
+   #+END_SRC
+* 面向对象
+
+** 接口
+
+  #+BEGIN_SRC typescript
+    interface Person {
+        name: string;
+        age: number;
+    }
+
+    let tomL Person = {
+        name: 'Tom',
+        age: 25
+    }
+  #+END_SRC
+  
+  赋值时变量的形状必须和接口保持一致。
+
+*** 可选属性
+
+    #+BEGIN_SRC typescript
+      interface Person {
+          name: string;
+          age?: number;
+      }
+
+      let tom: Person = {
+          name: 'Tom'
+      };
+
+      let john: Person = {
+          name: 'John',
+          age: 25
+      }
+    #+END_SRC
+    
+    使用 ? 表示可选属性，表示该属性可以不存在。
+
+*** 任意属性
+
+    #+BEGIN_SRC typescript
+      interface Person {
+          name: string;
+          age?: number;
+          [propName: string]: any;
+      }
+
+      let tom: Person = {
+          name: 'Tom',
+          gender: 'male'
+      };
+    #+END_SRC
+    
+    使用 =[propName: type]: type= 定义任意属性。这里属性名定义为 string 类型，类型为任意值。
+    
+    *需要注意的是，一旦定义了任意属性，那么可确定属性和可选属性必须是它的子属性。*
+
+    #+BEGIN_SRC typescript
+      interface Person {
+          name: string;
+          age?: number;
+          [propName: string]: string;
+      }
+
+      let tom: Person = {
+          name: 'Tom',
+          age: 25,
+          gender: 'male'
+      };
+      // 报错
+    #+END_SRC
+   
+    #+BEGIN_SRC typescript
+      interface Person {
+          name: string;
+          age?: number;
+          [propName: string]: string|number;
+      }
+
+      let tom: Person = {
+          name: 'Tom',
+          age: 25,
+          gender: 'male'
+      };
+      // 不报错
+    #+END_SRC
+
+*** 只读属性
+
+    使用 readonly 即可。
+
+    #+BEGIN_SRC typescript
+      interface Person {
+          readonly id: number;
+          name: string;
+          age?: number;
+          [propName: string]: any;
+      }
+
+      let tom: Person = {
+          id: 89757,
+          name: 'Tom',
+          gender: 'male'
+      };
+
+      tom.id = 9527;
+      // 不可写，报错
+    #+END_SRC
+
+    如果没有定义的话，也会报错一次。

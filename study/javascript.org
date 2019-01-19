@@ -2,51 +2,68 @@
 
 * 基本类型
 
-  - Number
+** Number
     
-    javascript 采用双精度浮点数表示数字，js 不区分整数值和浮点数。
+   javascript 采用双精度浮点数表示数字，js 不区分整数值和浮点数。
 
-    在具体实现时，整数值通常被视为 32 位整形变量，在个别实现中也以 32 位整形变量的形式存储直到被用于某些不支持的操作。
+   在具体实现时，整数值通常被视为 32 位整形变量，在个别实现中也以 32 位整形变量的形式存储直到被用于某些不支持的操作。
     
-    js 的 Math 对象提供更多高级数学函数。
-    #+BEGIN_SRC javascript
+   js 的 Math 对象提供更多高级数学函数。
+   #+BEGIN_SRC javascript
       Math.sin(3.5);
       var d = Math.PI * (r + r);
-    #+END_SRC
+   #+END_SRC
 
-    parseInt() 可以将字符串转换为整形。该函数的第二个参数表示所表示数字的进制。
+   parseInt() 可以将字符串转换为整形。该函数的第二个参数表示所表示数字的进制。
 
-    如果没有第二个参数，2013 年前的 js 会将以 0 开头的字符串视作八进制。
+   如果没有第二个参数，2013 年前的 js 会将以 0 开头的字符串视作八进制。
 
-    ‘+’ 也可以将数字字符串转换成数值。
-    #+BEGIN_SRC javascript
+   ‘+’ 也可以将数字字符串转换成数值。
+   #+BEGIN_SRC javascript
           + '42'; //42
           + '010'; // 10
           + '0x10'; // 16
-    #+END_SRC
+   #+END_SRC
     
-    parseFloat() 以解析浮点数，只解析十进制数。
+   parseFloat() 以解析浮点数，只解析十进制数。
     
-    如果给定的字符串不是数字形式，则会返回 NaN。
+   如果给定的字符串不是数字形式，则会返回 NaN。
 
-    NaN 与任何数相加都得 NaN。可以用 isNaN() 来判断变量是否为 NaN。
+   NaN 与任何数相加都得 NaN。可以用 isNaN() 来判断变量是否为 NaN。
     
-    Infinity（正无穷） 和 -Infinity（负无穷）。
-    #+BEGIN_SRC javascript
+   Infinity（正无穷） 和 -Infinity（负无穷）。
+   #+BEGIN_SRC javascript
       1/0;//Infinity
       -1/0;//-Infinity
-    #+END_SRC
+   #+END_SRC
     
-    isFinite() 可以来判断一个变量是否是有穷数，如果类型为 Infinity, -Infinity 或 NaN 则饭后 false。
+   isFinite() 可以来判断一个变量是否是有穷数，如果类型为 Infinity, -Infinity 或 NaN 则饭后 false。
     
-    *注意* : parseInt() 和 parseFloat() 会解析前面的数字直到遇到不能解析的符号。只有遇到非数字开头的字符串才会解析成 NaN。
-  - String
-  - Boolean
-  - Symbol
-  - Object
-    * Function
-    * Array
-    * Date
-    * RegExp
-  - Null
-  - Undefined
+   *注意* : parseInt() 和 parseFloat() 会解析前面的数字直到遇到不能解析的符号。只有遇到非数字开头的字符串才会解析成 NaN。
+** String
+
+   string 采用 unicode 码。
+
+   length 属性可以获得他的长度。
+   
+   #+BEGIN_SRC javascript
+     "hello".length;
+   #+END_SRC
+   
+   string 还有其他的方法。
+
+   #+BEGIN_SRC javascript
+     "hello".charAt(0); // "h"
+     "hello, world".replace("hello", "goodbye"); // "goodbye, world"
+     "hello".toUpperCase(); // "HELLO"
+   #+END_SRC
+   
+** Boolean
+** Symbol
+** Object
+   * Function
+   * Array
+   * Date
+   * RegExp
+** Null
+** Undefined
