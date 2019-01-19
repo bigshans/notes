@@ -9,3 +9,6 @@
 
   - [[./study/spring.org][spring.org]] (Spring framework study notes)
   - [[./study/git.org][git.org]] (Some knowledge about git)
+  - [[./study/javascript.org][javascript.org]] (Based knowledge of javascript) 
+  - [[./study/typescript.org][typescript.org]] (Based knowledge of javascript)
+  - [[./study/vimscript.org][vimscript.org]] (Hard way learn vimscript)
