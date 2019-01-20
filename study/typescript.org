@@ -251,6 +251,289 @@
          let args: IArguments = arguments;
      }
    #+END_SRC
+* 元组
+
+  不同类型的对象。
+
+  #+BEGIN_SRC typescript
+    let xcatliu: [string, number];
+    xcatliu[0] = 'Xcat Liu';
+    xcatliu[1] = 25;
+
+    xcatliu[0].slice(1);
+    xcatliu[1].toFixed(2);
+    xcatliu[0] = 'Xcat Liu';
+  #+END_SRC
+  对元组初始化或者赋值时需要提供所有的类型。
+  
+** 越界元素
+
+   添加越界元素会被限制为元组每个类型的联合类型。
+   
+* 枚举
+
+  enum 关键字。
+
+  #+BEGIN_SRC typescript
+    enum Days {Sun, Mon, Tue, Wed, Thu, Fri, Sat};
+
+    console.log(Days["Sun"] === 0); // true
+    console.log(Days["Mon"] === 1); // true
+    console.log(Days["Tue"] === 2); // true
+    console.log(Days["Sat"] === 6); // true
+
+    console.log(Days[0] === "Sun"); // true
+    console.log(Days[1] === "Mon"); // true
+    console.log(Days[2] === "Tue"); // true
+    console.log(Days[6] === "Sat"); // true
+  #+END_SRC
+  
+  第一句将被编译为：
+  #+BEGIN_SRC typescript
+    var Days;
+    (function (Days) {
+        Days[Days["Sun"] = 0] = "Sun";
+        Days[Days["Mon"] = 1] = "Mon";
+        Days[Days["Tue"] = 2] = "Tue";
+        Days[Days["Wed"] = 3] = "Wed";
+        Days[Days["Thu"] = 4] = "Thu";
+        Days[Days["Fri"] = 5] = "Fri";
+        Days[Days["Sat"] = 6] = "Sat";
+    })(Days || (Days = {}));
+  #+END_SRC
+  
+  可以手动赋值。
+  #+BEGIN_SRC typescript
+    enum Days {Sun = 7, Mon = 1, Tue, Wed, Thu, Fri, Sat};
+
+    console.log(Days["Sun"] === 7); // true
+    console.log(Days["Mon"] === 1); // true
+    console.log(Days["Tue"] === 2); // true
+    console.log(Days["Sat"] === 6); // true
+  #+END_SRC
+  
+** 常数枚举
+
+   #+BEGIN_SRC typescript
+     const enum Directions {
+         Up,
+         Down,
+         Left,
+         Right
+     }
+
+     let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right];
+   #+END_SRC
+   会在编译阶段被删除，且不能包含计算成员。
+   
+** 外部枚举
+
+   #+BEGIN_SRC typescript
+     declare enum Directions {
+         Up,
+         Down,
+         Left,
+         Right
+     }
+
+     let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right];
+   #+END_SRC
+* 函数
+** 函数声明
+
+*** 函数声明
+    #+BEGIN_SRC typescript
+     function sum(x, y) {
+         return x + y;
+     }
+    #+END_SRC
+   
+*** 函数表达式:
+    #+BEGIN_SRC typescript
+     let sum = function(x, y) {
+         return x + y;
+     }
+    #+END_SRC
+   
+*** 输入输出约束
+    #+BEGIN_SRC typescript
+      function sum(x: number, y: number): number {
+          return x + y;
+      }
+    #+END_SRC
+    输入的参数形状必须吻合。
+
+** 函数表达式
+   #+BEGIN_SRC typescript
+     let sum = function(x: number, y: number): number {
+         return x + y;
+     }
+   #+END_SRC
+
+   这里对 =sum= 变量做了类型推断，完整的是:
+   #+BEGIN_SRC typescript
+     let sum: (x: number, y: number) => number = function(x: number, y: number): number {
+         return x + y;
+     }
+   #+END_SRC
+   
+** 接口定义函数形状
+   #+BEGIN_SRC typescript
+     interface search_func {
+         (source: string, sub_string: string): boolean;
+     }
+
+     let my_search: search_func;
+     my_search = function(source: string, sub_string: string) {
+         return source.search(sub_string) !== -1;
+     }
+   #+END_SRC
+   
+** 可选参数
+   使用 ? 表示可选参数:
+   #+BEGIN_SRC typescript
+     function build_name(first_name: string, last_name?: string) {
+         if (last_name) {
+             return first_name + ' ' + last_name;
+         } else {
+             return first_name;
+         }
+     }
+
+     let tomcat = build_name('Tom', 'Cat');
+     let tom = buld_name('Tom');
+   #+END_SRC
+   可选参数必须在后面，这与其他语言情况差不多。
+
+** 参数默认值
+   #+BEGIN_SRC typescript
+     function buildName(firstName: string, lastName: string = 'Cat') {
+         return firstName + ' ' + lastName;
+     }
+     let tomcat = buildName('Tom', 'Cat');
+     let tom = buildName('Tom');
+   #+END_SRC
+   ts 会将添加了默认值的参数识别为可选参数。
+
+   此时不受可选参数必须接在必需参数后面的限制了:
+   #+BEGIN_SRC typescript
+     function buildName(firstName: string = 'Tom', lastName: string) {
+         return firstName + ' ' + lastName;
+     }
+     let tomcat = buildName('Tom', 'Cat');
+     let cat = buildName(undefined, 'Cat');
+   #+END_SRC
+
+** 剩余参数
+   #+BEGIN_SRC typescript
+     function push(array, ..items) {
+         items.forEach(function(item)) {
+             array.push(item);
+         }
+     }
+
+     let a = [];
+     push(a, 1, 2, 3)
+   #+END_SRC
+   使用 =...rest= 的方式获取函数中的剩余参数。
+
+   事实上，items 是一个数组，我们可以用数组的类型定义它。
+   #+BEGIN_SRC typescript
+     function push(array: any[], ...items: any[]) {
+         items.forEach(function(item) {
+             array.push(item);
+         });
+     }
+
+     let a = [];
+     push(a, 1, 2, 3);
+   #+END_SRC
+   
+** 重载
+   #+BEGIN_SRC typescript
+     function reverse(x: number): number;
+     function reverse(x: string): string;
+     function reverse(x: number | string): number | string {
+         if (typeof x === 'number') {
+             return Number(x.toString().split('').reverse().join(''));
+         } else if (typeof x === 'string') {
+             return x.split('').reverse().join('');
+         }
+     }
+   #+END_SRC
+   
+   上面两个是定义，最下面是实现。
+
+   ts 会优先从最前面的函数开始匹配，所以多个函数定义如果有包含关系，需要优先把精确定义写在前面。
+* 类型断言
+
+  <type>value 或 value as type
+  
+  在联合类型里可以这么用:
+  #+BEGIN_SRC typescript
+    function getLength(something: string | number): number {
+        if ((<string>something).length) {
+            return (<string>something).length;
+        } else {
+            return something.toString().length;
+        }
+    }
+  #+END_SRC
+  不能断言一个联合类型中不存在的类型。
+
+* 声明文件
+
+  使用 declare 关键字。
+
+  #+BEGIN_SRC typescript
+    // jQuery.d.ts
+    declare var jQuery: (arg0:string) => any;
+  #+END_SRC
+  .d.ts 作为声明文件的后缀。
+  
+  用 =///= 表示引用了声明文件。
+  #+BEGIN_SRC typescript
+    /// <reference path="./jQuery.d.ts" />
+
+    jQuery('#foo');
+  #+END_SRC
+  
+* 内置对象
+
+  ts 核心库定义了所有浏览器环境需要用到的类型。
+  
+  写 nodejs 需要引入第三方声明文件。
+  #+BEGIN_SRC sh
+    npm install @types/node --save-dev
+  #+END_SRC
+
+* 别名
+
+  使用 type 关键字。
+  #+BEGIN_SRC typescript
+    type Name = string;
+    type NameResolver = () => string;
+    type NameOrResolver = Name | NameResolver;
+    function getName(n: NameOrResolver): Name {
+        if (typeof n === 'string') {
+            return n;
+        } else {
+            return n();
+        }
+    }
+  #+END_SRC
+  
+** 字符串字面量类型
+   用来约束只能是某几个字符串中的一个。
+   #+BEGIN_SRC typescript
+     type EventNames = 'click' | 'scroll' | 'mousemove';
+     function handleEvent(ele: Element, event: EventNames) {
+         // do something
+     }
+
+     handleEvent(document.getElementById('hello'), 'scroll');  // 没问题
+     handleEvent(document.getElementById('world'), 'dbclick'); // 报错，event 不能为 'dbclick'
+   #+END_SRC
 * 面向对象
 
 ** 接口
@@ -361,3 +644,90 @@
     #+END_SRC
 
     如果没有定义的话，也会报错一次。
+** 类
+
+   使用 class 定义类，constructor 定义构造函数。
+
+   使用 new 生成新实例。
+
+   #+BEGIN_SRC typescript
+     class Animal {
+         constructor(name) {
+             this.name = name;
+         }
+         sayHi() {
+             return `My name is ${this.name}`;
+         }
+     }
+
+     let a = new Animal('Jack');
+     console.log(a.sayHi()); // My name is Jack
+   #+END_SRC
+   
+*** 存取器
+
+    使用 get 和 set。
+    #+BEGIN_SRC typescript
+      class Animal {
+          constructor(name) {
+              this.name = name;
+          }
+          get name() {
+              return 'Jack';
+          }
+          set name(value) {
+              console.log('setter: ' + value);
+          }
+      }
+
+      let a = new Animal('Kitty'); // setter: Kitty
+      a.name = 'Tom'; // setter: Tom
+      console.log(a.name); // Jack
+    #+END_SRC
+    
+*** 静态方法
+    
+    #+BEGIN_SRC typescript
+      class Animal {
+          static isAnimal(a) {
+              return a instanceof Animal;
+          }
+      }
+
+      let a = new Animal();
+      Animal.isAnimal(a); // true
+      a.isAnimal(a); // TypeError: a.isAnimal is not a function
+    #+END_SRC
+    
+*** ES7 中类的用法
+
+    ts 实现了 es7 中的一些用法。
+
+**** 实例属性
+     #+BEGIN_SRC typescript
+       class Animal {
+           name = 'Jack';
+
+           constructor() {
+               // ...
+           }
+       }
+
+       let a = new Animal();
+       console.log(a.name); // Jack
+     #+END_SRC
+
+**** 静态属性 
+     #+BEGIN_SRC typescript
+       class Animal {
+           static num = 42;
+
+           constructor() {
+               // ...
+           }
+       }
+
+       console.log(Animal.num); // 42
+     #+END_SRC
+
+*** public private 和 protected

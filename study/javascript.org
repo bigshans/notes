@@ -59,11 +59,126 @@
    #+END_SRC
    
 ** Boolean
+   
+   转换规则：
+   1. false、0、 空字符串、NaN、null 和 undefined 被转换为 false
+   2. 其他为 true。
+   
+   可以使用 =Boolean()= 进行显示转换。
 ** Symbol
 ** Object
    * Function
    * Array
    * Date
    * RegExp
-** Null
-** Undefined
+** Null 和 Undefined
+
+   null 和 undefined 是不同的，前者表示一个空值，后者是未定义的类型对象，表示一个未初始化的值。
+   
+   一个未被赋值的变量就是 undefined 类型。undefined 实际上是一个不允许修改的常量。
+* 变量
+*** let
+
+    声明一个块级作用域的本地变量，并且可选的将其初始化为一个值。
+
+    #+BEGIN_SRC javascript
+      let a;
+      let name='Simon';
+      for (let i = 0; i < 5; i++) {
+          // i 只能在这里使用
+      }
+    #+END_SRC
+
+*** const
+
+    声明一个不可变的常量，这个常量在定义域内总是可见的。
+
+    #+BEGIN_SRC javascript
+      const Pi = 3.14;
+      Pi = 1; // Error
+    #+END_SRC
+
+*** var
+
+    最常用的声明变量关键字，var 声明的变量在它所声明的整个函数内都是可见的。
+
+    #+BEGIN_SRC javascript
+      // myVarVariable *is* visible out here. It's undefined.
+
+      for (var myVarVariable = 0; myVarVariable < 5; myVarVariable++) { 
+          // myVarVariable is visible to the whole function 
+      } 
+
+      // myVarVariable *is* visible out here
+    #+END_SRC
+    
+
+  js 只有函数有作用域，没有块作用域。ES6 开始允许你使用 let 和 const 创建块作用域。
+
+* 运算符
+  
+** + 操作符
+
+   可以用来连接字符串。
+
+   如果用一个字符串加上数字（或其他值），那么操作数会首先转换成字符串。
+
+   #+BEGIN_SRC javascript
+     "3" + 4 + 5; // 345
+     3 + 4 + "5"; // 75
+   #+END_SRC
+   
+** 比较操作
+   
+*** == 操作符
+
+    比较操作符会为两个不同类型的操作数转换类型，然后进行严格比较。
+
+    当操作数都是对象时，js 会比较内部引用，当且仅他们在栈内存中的引用地址相同时相等。
+
+    #+BEGIN_SRC javascript
+      1   ==  1     // true
+      "1"  ==  1     // true
+      1   == '1'    // true
+      0   == false  // true
+    #+END_SRC
+    
+*** != 操作符
+
+    仅当操作符不相等时返回 true。
+
+    #+BEGIN_SRC javascript
+      1 !=   2     // true
+      1 !=  "1"    // false
+      1 !=  '1'    // false
+      1 !=  true   // false
+      0 !=  false  // false
+    #+END_SRC
+    
+*** === 操作符
+
+    严格相等时为 true。
+
+*** !== 操作符
+
+    当操作数不相等或不同类型时返回 true。
+    
+*** 关系运算符
+
+**** >
+**** >=
+**** <
+**** <=
+     
+*** 使用比较运算符
+
+    当比较运算涉及类型转换时，js 会按一下规则对字符串、数字。布尔或对象类型的操作数进行操作：
+
+    - 数字和字符串进行比较，字符串会转换为数字值。 
+    - 如果其中一个操作数为布尔类型，那么布尔操作数如果为 true，则转换为 1，为 false 转换为 0。
+    - 对象和数字或字符串进行比较，js 会尝试返回对象的默认值。操作符会尝试通过方法 =valueOf()= 和 =toString()= 进行转换，如果失败，则产生一个运行时错误。
+    - *注意* : 当且仅当与原始值比较时，对象会被转换为原始值。当两个操作数均为对象时，它们作为对象比较。
+
+
+    *另*:字符串对象是对象，不是字符串。
+* 控制结构
