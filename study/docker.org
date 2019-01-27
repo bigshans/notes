@@ -1,0 +1,140 @@
+#+TITLE: DOCKER study note
+
+* INTRONDUCTION
+
+** What is docker?
+
+   Docker is tool that allows developers, sysadmins etc. to easily deploy thier applications in sandbox to run on the host operating systemd i.e. linux.The key benefit of Docker is that it allows user to package an application with all of its dependencies into a standardized unit for software development.
+
+** What are containers?
+
+   Containers take a different approach: by leveraging the low-level mechanics of the host operating system, containers provide most of isolation of virtual machines at a fraction of computing power.
+   
+** Why use containers?
+
+   Containers offer a logical packaging mechanism in which applications can be abstracted from the environment in which tehy actually run. This decoupling allows container-based applications to be solved easily and consistenly, regardless of whether what the target environment is. This gives developers the ablility to create predictable environment that are isolated from rest of the applications and can be run anywhere.
+
+* Hello World
+ 
+  Once you install docker successfully. You can run the command following:
+
+  #+BEGIN_SRC sh
+    docker run hello-world
+  #+END_SRC
+  
+  Let's take the busybox for example.
+
+  To get started, let's run the following command in terminal:
+
+  #+BEGIN_SRC sh
+    docker pull busybox
+  #+END_SRC
+  
+  The =pull= command fetches the busybox image from the Docker registry and saves it to our system. You can use the =docker images= command to see a list of all images on your system.
+
+  #+BEGIN_SRC sh
+    docker images
+  #+END_SRC
+  
+** Docker Run
+   
+   Now we can run our docker images.
+   
+   When you execute the following:
+
+   #+BEGIN_SRC sh
+     docker run busybox
+   #+END_SRC
+   
+   You will find nothing output. When you call run, the Docker client finds the image, loads up the container and then runs a command in that container. So when running =docker run busybox=, we didn't provide a command can run. The container booted up, ran an empty command and then exited.
+
+   Now we how to run the command to get the output, like this:
+
+   #+BEGIN_SRC sh
+     docker run busybox echo "hello from busybox"
+   #+END_SRC
+   
+   Nice!
+
+   When we wander all containers that currently running, =docker ps= can help you.
+
+   #+BEGIN_SRC sh
+     docker ps
+   #+END_SRC
+   
+   But how can we get all containers we ran? Answer is =docker ps -a=.
+
+   #+BEGIN_SRC sh
+     docker ps -a
+   #+END_SRC
+   
+   If we want to run command in our containers,  we can run the =run= command with the =-it= flags.
+
+   #+BEGIN_SRC sh
+     docker run -it busybox sh
+   #+END_SRC
+   
+   How do we delete a container. =docker rm=.
+
+   #+BEGIN_SRC sh
+     docker rm [container IDs]
+   #+END_SRC
+   
+   If we want to delete all containers exited, run the following:
+
+   #+BEGIN_SRC sh
+     docker rm $(docker ps -a -q -f status=exited)
+   #+END_SRC
+   
+   In later version of Docker, we can use the following instead of above command.
+
+   #+BEGIN_SRC sh
+     docker container prune
+   #+END_SRC
+
+** Terminology
+
+*** images
+    
+    In Docker, everything is based on Images. An image is a combination of a file system and parameters.
+*** containers
+    
+    Containers are instances of Docker images that can be run using the Docker run command. The basic purpose of docker is to run containers.
+*** docker daemon
+
+    The backgroud service running on the host that manages building, running and distributing Docker containers. The daemon is the process that runs in the operating system to which clients talk to.
+*** docker client
+    
+    The command line tool that allows the user to interact with the daemon.
+*** docker hub
+    
+    A registry of Docker images.
+
+* WebApps with Docker
+  
+** Static Sites
+
+   Let's take the staic site image for example.Running the following command we can get a staicsite image.
+   #+BEGIN_SRC sh
+     docker run --rm prakhar1989/static-site
+   #+END_SRC
+   The =--rm= flag automatically removes the container when it exits. Since the image doesn't exit locally, the client will first fetch the image from the registry and run the image. If all goes well, you should see a =Nginx is running...= message in your terminal.
+   #+BEGIN_SRC sh
+     docker run -d - --name static-site prakhar1989/static-site
+   #+END_SRC
+   In the above command, =-d= will detach our terminal, =-P= will publish all exposed to random ports and finally =--name= corresponds to a name we want to give. Now we can see the ports by running the =docker port [CONTAINER]= command.
+   #+BEGIN_SRC sh
+     docker port static-site
+   #+END_SRC
+   You can alse specify a custom port to which the client will forward connections to the container.
+   #+BEGIN_SRC sh
+     docker run -p 8888:80 prakhar1989/static-site
+   #+END_SRC
+   To stop a detach container, run =docker stop= by giving the container ID.
+   #+BEGIN_SRC sh
+     docker stop static-site
+   #+END_SRC
+   
+** Docker Images
+   
+   Now we are exploring how to build an image.
