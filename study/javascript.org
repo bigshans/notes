@@ -182,3 +182,128 @@
 
     *另*:字符串对象是对象，不是字符串。
 * 控制结构
+
+  - if
+    #+BEGIN_SRC javascript
+      var name = "kittens";
+      if (name == "puppies") {
+          name += "!";
+      } else if (name == "kittens") {
+          name += "!!";
+      } else {
+          name = "!" + name;
+      }
+      name == "kittens!!"; // true
+    #+END_SRC
+  - while and do-while
+    #+BEGIN_SRC javascript
+      while (true) {
+          // 一个无限循环！
+      }
+
+      var input;
+      do {
+          input = get_input();
+      } while (inputIsNotValid(input))
+    #+END_SRC
+  - for
+    #+BEGIN_SRC javascript
+      for (var i = 0; i < 5; i++) {
+          // 将会执行五次
+      }
+
+      for (let value of array) {
+          // do something with value
+      }
+
+      for (let property in object) {
+          // do something with object property
+      }
+    #+END_SRC
+  - switch
+    #+BEGIN_SRC javascript
+      switch(action) {
+      case 'draw':
+          drawIt();
+          break;
+      case 'eat':
+          eatIt();
+          break;
+      default:
+          doNothing();
+      }
+    #+END_SRC
+    =switch= 和 =case= 是使用 ===== 严格相等运算符进行比较的。
+* 对象
+** 对象创建
+
+   有两种简单的方法可以创建一个空对象：
+   #+BEGIN_SRC javascript
+     var obj = new Object();
+   #+END_SRC
+   和：
+   #+BEGIN_SRC javascript
+     var obj = {};
+   #+END_SRC
+   两种方法在语义上是相同的。第二种更方便的方法叫做「字符字面量」法。一般我们优先选择第二种方法。
+   
+   “对象字面量”也可以用来在对象实例中定义一个对象：
+   #+BEGIN_SRC javascript
+     var obj = {
+         name: "Carrot",
+         "for": "Max",//'for' 是保留字之一，使用'_for'代替
+         details: {
+             color: "orange",
+             size: 12
+         }
+     }
+   #+END_SRC
+   对象的属性可以通过链式表示方法进行访问：
+   #+BEGIN_SRC javascript
+     obj.details.color;
+     obj["details"]["size"];
+   #+END_SRC
+   下面的例子创建了一个对象原型， =Person= ，和这个原型的实例， =You= 。
+   #+BEGIN_SRC javascript
+     function Person(name, age) {
+         this.name = name;
+         this.age = age;
+     }
+
+     // 定义一个对象
+     var You = new Person("You", 24); 
+     // 我们创建了一个新的 Person，名称是 "You" 
+     // ("You" 是第一个参数, 24 是第二个参数..)
+   #+END_SRC
+   完成创建后，对象属性可以通过如下两种方式进行赋值和访问：
+   #+BEGIN_SRC javascript
+     obj.name = "Simon"
+     var name = obj.name
+   #+END_SRC
+   和：
+   #+BEGIN_SRC javascript
+     obj['name'] = 'Simon';
+     var name = obj['name'];
+     var user = prompt('what is your key?')
+     obj[user] = prompt('what is its value?')
+   #+END_SRC
+   两种方法在语义上是相同的。第二种方法的优点在于属性的名称被看作一个字符串。
+   #+BEGIN_SRC javascript
+     obj.for = "Simon"; // 语法错误，因为 for 是一个预留关键字
+     obj["for"] = "Simon"; // 工作正常
+   #+END_SRC
+** 数组
+
+   传统创建法：
+   #+BEGIN_SRC javascript
+     var a = new Array();
+     a[0] = "dog";
+     a[1] = "cat";
+     a[2] = "hen";
+     a.length;
+   #+END_SRC
+   使用数组字面量：
+   #+BEGIN_SRC javascript
+     var a = ["dog", "cat", "hen"];
+     a.length;
+   #+END_SRC

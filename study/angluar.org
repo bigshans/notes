@@ -1,0 +1,57 @@
+#+TITLE: Angluar study
+
+* Angular 入门
+** Angular 语法
+*** *ngFor
+- 用法:
+  #+BEGIN_SRC html
+<div *ngFor="let hero of heroes">
+  {{hero.name}}
+</div>
+  #+END_SRC
+- 作用: 循环模板。
+*** *ngIf
+- 用法:
+  #+BEGIN_SRC html
+<div *ngIf="selectedHero">
+  show
+</div>
+  #+END_SRC
+- 作用: 判断条件，为 true 时显示。
+*** []
+1. 属性绑定
+   - 用法:
+     #+BEGIN_SRC html
+<img [src]="heroImageUrl" />
+     #+END_SRC
+     - 作用: 绑定元素、组件、指令的 property
+2. css 绑定
+   - 用法:
+     #+BEGIN_SRC html
+<div [class.special]="isSpecial">Special</div>
+     #+END_SRC
+   - 作用: 绑定 css ，根据表达式的值插入或删除类
+3. attribute 绑定
+   - 用法:
+     #+BEGIN_SRC html
+<div [attr.aria-label]="help">help</div>
+     #+END_SRC
+   - 作用: 绑定 attribute
+4. style 绑定
+   - 用法:
+     #+BEGIN_SRC html
+<button [style.color]="isSpecial?'red':'green'"></button>
+     #+END_SRC
+   - 作用: style 属性绑定
+*** ()
+- 用法：
+  #+BEGIN_SRC html
+<button (click)="onSave($event)">Save</button>
+  #+END_SRC
+- 作用: 事件绑定。
+*** [()]
+- 用法:
+  #+BEGIN_SRC html
+<app-size [(size)]="fontSizePx"></app-sizer>
+  #+END_SRC
+- 作用: 双向绑定。

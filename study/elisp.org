@@ -1,0 +1,40 @@
+* Emacs Lisp Basic
+** Hello World Example
+   #+BEGIN_SRC emacs-lisp
+     (message "Hello World")
+   #+END_SRC
+** Basic
+*** Function & Value
+    elisp 中定义函数是用这样的形式:
+    #+BEGIN_SRC emacs-lisp
+      (defun function-name (arguments-list)
+	"document string"
+	body)
+    #+END_SRC
+    Hello World For example:
+    #+BEGIN_SRC emacs-lisp
+      (defun hello-world (name)
+	"Say hello to user whose name is NAME."
+	(message "Hello, %s" name))
+    #+END_SRC
+    使用 =C-h f= 可以查看这个函数的文档。
+    运行一个函数，最一般的方式是：
+    #+BEGIN_SRC emacs-lisp
+    (function-name arguments-list)
+    #+END_SRC
+    比如之前函数：
+    #+BEGIN_SRC emacs-lisp
+    (hello-world "Emacser")
+    #+END_SRC
+    定义变量使用 ~setq~ ：
+    #+BEGIN_SRC emacs-lisp
+    (setq foo "I'm foo"')
+    (message foo)
+    #+END_SRC
+    使用 =C-c v= 可以查看这个变量的文档。
+    ~defvar~ 也可以声明变量：
+    #+BEGIN_SRC emacs-lisp
+    (defvar variable-name value
+    "document string")
+    #+END_SRC
+    与 ~setq~ 不同的是，如果声明变量已经有一个值的话，用 ~defvar~ 声明的值不会变成声明的值。另一个区别是 ~defvar~ 可以为变量提供文档字符串。
