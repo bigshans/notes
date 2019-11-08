@@ -142,4 +142,15 @@
      - exec 格式： ~RUN ["可执行文件", "参数"]~ 。
     每一层构建的最后一定要清理掉无关文件。
 ** 构建镜像
-   在 dockerfile 
+   在 dockerfile 文件所在目录执行：
+   #+begin_src shell
+   docker build -t nginx:v3 .
+   #+end_src
+   我们使用 ~docker build~ 命令进行镜像构建。其格式为：
+   #+begin_src shell
+   docker build [选项] <上下文路径/URL/->
+   #+end_src`
+** 镜像构建上下文
+   指定的是上下文路径。
+** 其它 docker build 的用法
+   
