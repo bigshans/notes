@@ -1,0 +1,156 @@
+#+TITLE: Golang 笔记
+
+* Golang 如何进行赋值？
+
+** 赋值方式
+*** 声明式赋值
+#+begin_src go
+var h int;
+var b, a = 5, 6;
+var k int = 5;
+#+end_src
+*** Pascal 式赋值
+#+begin_src go
+c := 7;
+#+end_src
+** 基础值的类型
+*** 布尔 - `bool`
+*** 字符串 - `string`
+*** 数字
+**** 整数
+***** 有符号 - `int int8 int16 int32 int64`
+***** 无符号 - `uint uint8 uint16 uint32 uint64`
+***** 指针值 - `unitptr`
+***** 字节 - `byte` `uint8` 的别名
+***** 符文 - `rune` `int32` 的别名
+**** 浮点数 - `float32 float64`
+**** 复数 - `complex64 complex128`
+** 类型转换 - 显式类型转换，不允许隐式转换
+** 常量定义
+#+begin_src go
+const Word = "世界";
+const (
+	Big = 1 << 100
+	Small = Big >> 99
+)
+#+end_src
+
+* Golang 控制流
+
+** 循环
+*** `for`
+**** while 式
+***** 死循环
+#+begin_src go
+for {/* code statment */}
+#+end_src
+***** 条件循环
+#+begin_src go
+a := 0;
+for a > 10 {
+	a += 1;
+}
+#+end_src
+**** step by step 式
+#+begin_src go
+for i := 0; i < 10; i += 1 {
+	fmt.Println(i);
+}
+#+end_src
+**** iterator 式
+#+begin_src go
+a := []string{};
+a.append(a, "hello");
+a.append(a, "word");
+for _, aa := range a {
+	fmt.Print(aa);
+	fmt.Print(" ");
+}
+#+end_src
+** 分支
+*** `if`
+#+begin_src go
+x := 5;
+if x > 4 {
+	fmt.Println('big!');
+}
+#+end_src
+可以在表达式执行前执行一个简单语句。
+#+begin_src go
+if x := 5; x > 4 {
+	fmt.Println('big!');
+}
+#+end_src
+*** `else`
+#+begin_src go
+if x := 5; x > 4 {
+	fmt.Println('big!');
+} else {
+	fmt.Println('small!');
+}
+#+end_src
+*** `switch`
+**** 有条件的
+#+begin_src go
+switch i {
+case 0:
+case f():
+}
+#+end_src
+**** 无条件的
+#+begin_src go
+t := time.Now()
+switch {
+case t.Hour() < 12:
+    fmt.Println("Good morning!")
+case t.Hour() < 17:
+    fmt.Println("Good afternoon.")
+default:
+    fmt.Println("Good evening.")
+}
+#+end_src
+**** fallthrough
+
+继续执行语句。golang 中会自动终止执行。
+** `defer`
+
+`defer` 语句会将函数推迟到外层函数返回之后执行。
+
+推迟调用的函数其参数会立即求值，但直到外层函数返回前该函数都不会被调用。
+
+* Golang 函数
+
+** 如何声明？
+** 匿名函数
+
+* Golang 数组与切片
+
+* Golang 的引用与指针
+
+* Golang 的模块导入和导出
+
+** 导入的两种语法
+*** 单独导入 － `import "<package>"`
+*** 分组导入
+#+begin_src go
+import (
+    "fmt"
+    "math"
+)
+#+end_src
+** 导出方式：首字母大写
+** 常用模块
+
+- math/rand.Intn()
+
+* Golang 的协程
+
+** 什么是 channel？
+** 何时切换？
+
+* Golang 的 OO
+
+** 复合结构的定义
+** 封装
+** 继承
+** 多态

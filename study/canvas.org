@@ -1,0 +1,22 @@
+* canvas 学习笔记
+
+** basic template
+   
+   #+begin_src html
+     <head>
+       <title>Canvas tutorial</title>
+       <script>
+	 function draw() {
+	     let canvas = document.getElementById('canvas');
+	     if (canvas.getContext) {
+		 let ctx = canvas.getContext('2d');
+	     }
+	 }
+       </script>
+     </head>
+     <body onload="draw();">
+       <canvas id="canvas"></canvas>
+     </body>
+   #+end_src
+
+   

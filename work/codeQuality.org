@@ -1,0 +1,437 @@
+#+TITLE: 代码质量
+#+latex_header: \hypersetup{colorlinks=true,linkcolor=black}
+#+latex_header: \usepackage{autobreak}
+
+* 令人困惑的代码
+
+代码写多了，我们往往来不及不回头看代码，等到需要维护的时候，看到过去的代码往往一脸懵逼：啥啥啥，这都是啥？
+
+现在我们就来看看我们在过去写的一些「有趣」的代码吧！
+
+** 永远也走不到的代码
+
+#+begin_src typescript
+async function getAccessToken() {
+    try {
+      const resp = await axios.get(
+        `${config.esignInfo.apiBaseUrl}/v1/oauth2/access_token`,
+        {
+          params: {
+            appId: config.esignInfo.appId,
+            secret: config.esignInfo.secret,
+            grantType: 'client_credentials',
+          },
+        },
+      );
+      accesToken = resp.data.data.token;
+      this.cache.setAndExpireAt(
+        'esignAccesToken',
+        accesToken,
+        new Date(new Date().getTime() + 1.5 * 3600 * 1000),
+      );
+      return accesToken;
+    } catch (e) {
+      throw Error(`getAccessToken failed:${e.code} :${e.message}`);
+    }
+    return null;
+}
+#+end_src
+
+显然，这里的 `return null` 是永远也走不到的。`accesToken` 是外部变量，这里完全可以将 `return accesToken` 提到外面来。嗯，而且 access 还拼写错了。简单改一下：
+
+#+begin_src typescript
+async function getAccessToken() {
+    try {
+        // 略只是去掉了 return 语句
+    } cache (e) {
+      throw Error(`getAccessToken failed:${e.code} :${e.message}`);
+    }
+    return accesToken;
+}
+#+end_src
+
+** 测试代码与注释混杂
+
+#+begin_src typescript
+/**
+ * 验证签名
+ * timestamp:request.qurey里客户端带过来的
+ * 用secret生成md5和decodeContentStr的sign对比
+ * （secret是从common里面调用相应的service从数据库查询出来的）
+ */
+ export function validateSign(ctx, secretKey) {
+  // 以下注释代码是生成body的demo
+  // const timestamp = 1602740771946;
+  // const data = { kasn: 'KA123456', volume: '10*20*30',weight:12.2,freightFee:1002};
+  // const mmd5str = createMd5Str(timestamp + secretKey + JSON.stringify(data));
+  // const bodyJson = JSON.stringify({
+  //   data: JSON.stringify(data),
+  //   sign: mmd5str,
+  // });
+  // const bodyRaw = bodyEncrypt(bodyJson, secretKey);
+  // console.log('====bodyRaw', bodyRaw);
+  // 以上代码是生成测试数据用
+  console.log('ctx.request.body', ctx.request.body);
+  try {
+    if (typeof ctx.request.body != 'string') {
+      return { isError: true, message: 'Body 格式错误，请使用raw格式传递参数' };
+    }
+    const decodeContentStr = desDecode(ctx.request.body, secretKey);
+    const decodeContent = JSON.parse(decodeContentStr);
+    const md5Str = createMd5Str(
+      ctx.request.query.timestamp +
+        secretKey.substring(0, 8) +
+        decodeContent.data,
+    );
+    // console.log('===md5Str', md5Str);
+    if (!decodeContent.sign) {
+      return { isError: true, message: 'Signature cannot be empty' };
+    }
+    if (decodeContent.sign != md5Str) {
+      return { isError: true, message: 'Signature error' };
+    }
+    return {
+      isError: false,
+      message: 'ok',
+      decodeData: decodeContent.data,
+    };
+  } catch (error) {
+    console.error('解析签名异常，原因：', error);
+    return { isError: true, message: 'Signature error,数据解析失败' };
+  }
+}
+#+end_src
+
+虽然是个习惯，但是最好不要将用不到的测试代码注释，最好直接删除。针对单个方法的测试，其实完全可以用单测实现，单个方法可以以测试驱动开发方式编写，即先写测试，以能进行测试该方法的方式编写该代码。
+
+另外，虽然有注释，然而代码注释并不文档化，组织有些混乱。其实可以参照现有的标准去写注释，比如 jsDOC 。
+
+如果没有特殊要求的话，建议不用 `!=`，改一下：
+
+#+begin_src typescript
+/**
+ ,* @description 验证签名，用secret生成md5和decodeContentStr的sign对比（secret是从common里面调用相应的service从数据库查询出来的）
+ ,* @param ctx 客户端请求
+ ,* @property ctx.request.query.timestamp 时间戳
+ ,* @param secret 密码
+ ,* @param timestamp 测试的时间戳
+ ,*/
+ export function validateSign(ctx, secretKey, timestamp?) {
+  console.log('ctx.request.body', ctx.request.body);
+  try {
+    if (typeof ctx.request.body != 'string') {
+      return { isError: true, message: 'Body 格式错误，请使用raw格式传递参数' };
+    }
+    const decodeContentStr = desDecode(ctx.request.body, secretKey);
+    const decodeContent = JSON.parse(decodeContentStr);
+    const md5Str = createMd5Str(
+        (timestamp || ctx.request.query.timestamp) +
+        secretKey.substring(0, 8) +
+        decodeContent.data,
+    );
+    if (proccess.env.DEBUG) {
+        console.log('===md5Str', md5Str);
+    }
+    if (!decodeContent.sign) {
+      return { isError: true, message: 'Signature cannot be empty' };
+    }
+    if (decodeContent.sign !== md5Str) {
+      return { isError: true, message: 'Signature error' };
+    }
+    return {
+      isError: false,
+      message: 'ok',
+      decodeData: decodeContent.data,
+    };
+  } catch (error) {
+    console.error('解析签名异常，原因：', error);
+    return { isError: true, message: 'Signature error,数据解析失败' };
+  }
+}
+#+end_src
+
+** 空空如也的实现
+
+#+begin_src typescript
+import { Inject, Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AccountService {
+  constructor(
+    // private contractDao: ContractDao,
+  ) {
+  }
+}
+#+end_src
+
+如果计划实现，就写个 TODO ，如果不要，这个地方就删掉。
+
+** 如果没有再次修改，就设置为 `readonly`
+
+#+begin_src typescript
+class AdminController {
+    constructor(
+        private adminService: AdminService
+    ) {}
+    // ... 略
+}
+#+end_src
+
+如果需要改变的需要，就将该属性设置为 `readonly` 以使使用者不混淆使用预期。
+
+#+begin_src typescript
+class AdminController {
+    constructor(
+        private readonly adminService: AdminService
+    ) {}
+    // ... 略
+}
+#+end_src
+
+** 没有意义的 `await`
+
+#+begin_src typescript
+async total() {
+    return await this.adminModel.countDocument({ status: { $in: [0, null] } });
+}
+#+end_src
+
+一个 async 函数会将返回值封装成一个 Promise ，这个里 `return await` 是多余的。
+
+#+begin_src typescript
+total() {
+    return this.adminModel.countDocument({ status: { $in: [0, null] } });
+}
+#+end_src
+
+** 参差不齐的命名
+
+#+begin_src typescript
+export const CACHE_STAT_RECEIPT_LOCK = 'CACHE_STAT_RECEIPT_LOCK';
+export const FREIGHT_TEMPLATE = 'FREIGHT_TEMPLATE=';
+export const KA_Comany_StoresMap_KEY = 'KA_Comany_StoresMap_KEY';
+#+end_src
+
+第三行命名与其他命名不一致。
+
+#+begin_src typescript
+export const CACHE_STAT_RECEIPT_LOCK = 'CACHE_STAT_RECEIPT_LOCK';
+export const FREIGHT_TEMPLATE = 'FREIGHT_TEMPLATE=';
+export const KA_COMANY_STORESMAP_KEY = 'KA_Comany_StoresMap_KEY';
+#+end_src
+
+** 超超超超长行
+
+#+begin_src typescript
+export const FieldsToExportKapackageFinanceStandard = (
+    'ka_sn ka_company ka_weight ka_volume volume_weight charged_weight receipt_date deliver_date freight_fee orig_freight_fee lz_weight_freight_fee lz_weight_orig_freight_fee volume_weight_freight_fee volume_weight_orig_freight_fee exchange_rate  proportion change_comment charged_date  lz_bag_id lz_tracking_number lz_item_desc lz_category_name lz_store_name lz_seller_id lz_order_number lz_weight ' +
+    ' lz_volume lz_volume_weight lz_sku operate_fee ka_insure_fee  th_instorage_date template_id template_name transport_type'
+  )
+#+end_src
+
+超级长行如果没有自动折行的话看起来是很费力的，明明是可以整理一下的。
+
+#+begin_src typescript
+export const FieldsToExportKapackageFinanceStandard = (
+    'ka_sn ka_company ka_weight ka_volume volume_weight ' +
+    'charged_weight receipt_date deliver_date ' +
+    'freight_fee orig_freight_fee lz_weight_freight_fee ' +
+    'lz_weight_orig_freight_fee volume_weight_freigh ' +
+    't_fee volume_weight_orig_freight_fee exchange_rate  ' +
+    'proportion change_comment charged_date  ' +
+    'lz_bag_id lz_tracking_number lz_item_desc lz_category_name ' +
+    'lz_store_name lz_seller_id lz_order_number lz_weight ' +
+    'lz_volume lz_volume_weight lz_sku operate_fee ka_insure_fee ' +
+    'th_instorage_date template_id template_name transport_type'
+  )
+#+end_src
+
+** 文件末尾没有空行
+
+#+begin_src typescript
+export const BoxMark = "Box_Mark"
+#+end_src
+
+文件末尾没有空行会使得某些工具运行不是很好，比如说 git 、 cat 、 more 等。
+
+比如说 git 会这样显示：
+
+#+begin_example
++export const BoxMark = "Box_Mark"
+\ No newline at end of file
+#+end_example
+
+cat 会多一个乱码符号。
+
+** 无用的尾随空格
+
+#+begin_src typescript
+export const LCLPriceDes = {
+    ...
+}
+#+end_src
+
+三个点指代空格，因为空格看不到。尾部空格根本没有意义，并且会在一般的格式化工具中被去掉，而在版本比较中引入噪音。去掉就是了。
+
+** if 中的花括号与换行
+
+#+begin_src typescript
+if  (!isLogin(req)) {return res.json(sendResponse(req, null, errno.UNLOGIN));}
+
+if (roles.some((r) => autauthorities.includes(r))) return next();
+#+end_src
+
+上下两种表达都有，技术上没有任何问题，不过从规范性和可读性来说，最好是加花括号和换行。且这种行为在一个团队中应当统一。
+
+#+begin_src typescript
+if  (!isLogin(req)) {
+    return res.json(sendResponse(req, null, errno.UNLOGIN));
+}
+
+if (roles.some((r) => autauthorities.includes(r))) {
+    return next();
+}
+#+end_src
+
+** 使用 `===` 和 `!==` 替代 `==` 和 `!=`
+
+#+begin_src typescript
+async function sendCaptcha(mobile, captcha) {
+  try {
+    const { Code } = await client.sendSMS({
+      PhoneNumbers: mobile,
+      SignName:
+        mobile.indexOf('852') == 0
+          ? config.alisms.signNameHK
+          : config.alisms.signName,
+      TemplateCode:
+        mobile.indexOf('852') == 0
+          ? config.alisms.templateCodeHK
+          : config.alisms.templateCode,
+      TemplateParam: `{"code":${captcha}}`,
+    });
+    if (Code !== 'OK') {
+      log.error(`短信发送失败, 返回code：${Code}`);
+      return Code;
+    }
+  } catch (e) {
+    log.error(`短信发送失败：${e.message}`);
+    return e.message;
+  }
+  return null;
+}
+#+end_src
+
+由于 `==` 和 `!=` 首先会进行强制类型转换，这将会带来一些错误，比如说 ``'\t\r\n' == 0` 为 `true` 。所以，如无什么必要就用 `===` 和 `!==` 替代，减少心智负担。
+
+#+begin_src typescript
+async function sendCaptcha(mobile, captcha) {
+  try {
+    const { Code } = await client.sendSMS({
+      PhoneNumbers: mobile,
+      SignName:
+        mobile.indexOf('852') === 0
+          ? config.alisms.signNameHK
+          : config.alisms.signName,
+      TemplateCode:
+        mobile.indexOf('852') === 0
+          ? config.alisms.templateCodeHK
+          : config.alisms.templateCode,
+      TemplateParam: `{"code":${captcha}}`,
+    });
+    if (Code !== 'OK') {
+      log.error(`短信发送失败, 返回code：${Code}`);
+      return Code;
+    }
+  } catch (e) {
+    log.error(`短信发送失败：${e.message}`);
+    return e.message;
+  }
+  return null;
+}
+#+end_src
+
+** 刚创建好就立刻返回的变量
+
+#+begin_src typescript
+export function yesterday(currentDate) {
+  // currentDate.setData(currentDate.getDate() - 1);
+  const date = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - 1,
+  );
+  return date;
+}
+#+end_src
+
+完全没有意义的声明，可以直接返回回去，方法名很好的描述了返回值，不需要在声明了。
+
+#+begin_src typescript
+export function yesterday(currentDate) {
+  // currentDate.setData(currentDate.getDate() - 1);
+  const date = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - 1,
+  );
+  return date;
+}
+#+end_src
+
+** 使用 for-of 替代 for-loop
+
+#+begin_src typescript
+for (let i = 0; i < valids.length; i++) {
+    const e = valids[i];
+    const { key, type } = e;
+    if (!key) {
+        res = false;
+        break;
+    }
+    let value = params[key] || '';
+    if (type === 'not_empty') {
+        if (IS.empty(value)) {
+        res = false;
+        break;
+        }
+    } else if (type === 'number') {
+        value = Number(value);
+        if (!IS.number(value) || IS.nan(value)) {
+        res = false;
+        break;
+        }
+    } else if (type === 'reg') {
+        const { reg } = e;
+        if (!reg || !reg.test(value)) {
+        res = false;
+        break;
+        }
+    } else if (!IS[type](value)) {
+        res = false;
+        break;
+    }
+}
+#+end_src
+
+可以自己写一个 ranger ，然后我们就可以用 python 了（误）。
+
+#+begin_src typescript
+function ranger(length) {
+    return [...Array(length).keys()];
+}
+
+for (const i of ranger(valids.length)) {
+    // ... 略
+}
+#+end_src
+
+但直接迭代就行了。
+
+#+begin_src typescript
+for (const e of valids) {
+    // ... 略
+}
+#+end_src
+
+使用 for-of 可以使代码更加整洁，不必关心计数器的问题。
