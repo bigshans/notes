@@ -1,4 +1,4 @@
-#+TITLE: 学习笔记
+#+TITLE: 笔记
 
 * INTRODUCTION
   这是我的个人笔记。主要是我的读书笔记和其他学习中的一些笔记。
@@ -7,10 +7,26 @@
 
 * INDEX
 
-  - [[./study/spring.org][spring.org]] (Spring framework study notes)
-  - [[./study/git.org][git.org]] (Some knowledge about git)
-  - [[./study/javascript.org][javascript.org]] (Based knowledge of javascript) 
-  - [[./study/typescript.org][typescript.org]] (Based knowledge of javascript)
-  - [[./study/vimscript.org][vimscript.org]] (Hard way learn vimscript)
-  - [[./study/docker.org][docker.org]]
-  - [[./study/haskell.org][haskell.org]]
+** study
+
+- [[./study/spring.org][spring.org]] (Spring framework study notes)
+- [[./study/git.org][git.org]] (Some knowledge about git)
+- [[./study/javascript.org][javascript.org]] (Based knowledge of javascript)
+- [[./study/typescript.org][typescript.org]] (Based knowledge of javascript)
+- [[./study/vimscript.org][vimscript.org]] (Hard way learn vimscript)
+- [[./study/docker.org][docker.org]]
+- [[./study/haskell.org][haskell.org]]
+- [[file:study/canvas.org][canvas.org]]
+- [[file:study/elisp.org][elisp.org]]
+- [[file:study/npy.org][npy.org]]
+- [[file:study/golang.org][golang.org]]
+- [[file:study/java-offer.org][java-offer.org]]
+- [[file:study/angluar.org][angular.org]]
+
+** work
+
+- [[file:work/codeQuality.org][codeQuailty.org]]
+
+** philosophy
+
+- [[file:philosophy/纯粹理性批判.org][纯粹理性批判.org]]
