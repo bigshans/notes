@@ -435,3 +435,501 @@ for (const e of valids) {
 #+end_src
 
 使用 for-of 可以使代码更加整洁，不必关心计数器的问题。
+
+** 重复的代码应提取为一个独立方法
+
+#+begin_src typescript
+async function generatePdf(pdfPath, company: any = {}, config: any = {}) {
+    try {
+        const pathToHtml = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign
+                ? 'contract_temp_esign.html'
+                : 'contract_temp.html',
+        );
+        const pathToHeader = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign ? 'header_temp.html' : 'header_temp_hk.html',
+        );
+        console.log('pathToHtml----pathToHeader----',pathToHtml,'----',pathToHeader,'-----',process.cwd());
+        let content = fs.readFileSync(pathToHtml, 'utf8');
+        const pathToHeaderTemplate = fs.readFileSync(pathToHeader, 'utf8');
+        const curDate = new Date();
+        const validDate = yearLater(curDate);
+        content = replacer(content, {
+            PPP: company.ka_contract_number_temp || '',
+            AAA: company.name || '', // 默认公司名
+            BBB: company.legal_person || '', // 法人代表姓名
+            CCC: company.legal_identity || '', // 法人代表身份证号
+            DDD: company.contact_person || '', // 联系人姓名
+            EEE: company.contact_mobile || '', // || '联系人电话',
+            FFF: company.address || '', // 联系地址
+            GGG: company.settlement_type === 1 ? 2 : 1, // 结算方式 2周结 1预存 （settlement_type：0预存，1周结）
+            HHH: validDate.getFullYear(), // 有效期年
+            JJJ: validDate.getMonth() + 1, // 有效期月
+            KKK: validDate.getDate(), // 有效期日
+            YYYY: curDate.getFullYear(),
+            MM: curDate.getMonth() + 1,
+            DD: curDate.getDate(),
+            III: company.bank_name || '', // 甲方开户行：
+            OOO: company.bank_account_name || '', // 甲方银行账户名：
+            LLL: company.bank_account || '', // 甲方银行账号
+            MMM: company.alipay_account_name || '', // 甲方支付宝账户名
+            NNN: company.alipay_account || '', // 甲方支付宝账号,
+            QQQ: company.company_email || '', // 公司对接人邮箱,
+            RRR: company.company_contact || '', // 公司对接人微信或钉钉,
+            SSS: company.bank_address || '', //付款銀行地址
+            TTT: company.hk_bank_number || '', //銀行編號
+            UUU: company.hk_branch_bank_number || '', //分行編號
+            VVV: company.hk_swift_code || '', //付款銀行SWIFT Code
+            WWW: company.bank_account_name || '', //客户名称
+            STORES: company.stores
+                .map(
+                    (store) =>
+                        `<tr><td><p>${company.name}</p></td><td><p>${
+                            store.company_name_of_store || ''
+                            }</p></td><td><p>${store.name || ''}</p></td><td><p>${
+                            store.store_id || ''
+                            }</p></td><td><p>${
+                            store.business_category || ''
+                            }</p></td><td><p>${
+                            store.transport_type == 2 ? '香港-泰国' : '大陆-泰国'
+                            }</p></td><td><p>${store.comment || ''}</p></td></tr>`,
+                )
+                .join(''),
+        });
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        const page = await browser.newPage();
+        // const dayTime = `${curDate.getFullYear()}${curDate.getMonth() + 1}${curDate.getDate()}`;
+        await page.setContent(content);
+        // await page.goto(`file:${pathToHtml}`, { waitUntil: 'networkidle0' });
+        await page.pdf({
+            path: pdfPath,
+            format: 'a4',
+            margin: {
+                top: '120px',
+                left: '20px',
+                right: '20px',
+                bottom: '20px',
+            },
+            displayHeaderFooter: true,
+            headerTemplate: pathToHeaderTemplate,
+        });
+        await browser.close();
+    } catch (e) {
+        log.error(`生成pdf文件失败：${e.message}`);
+        console.log('生成pdf文件失败：',e);
+        return e.message;
+    }
+    return null;
+}
+
+async function generatePdfFbl(pdfPath, company: any = {}, config: any = {}) {
+    try {
+        const pathToHtml = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign
+                ? 'contract_temp_esign_fbl.html'
+                : 'contract_temp_fbl.html',
+        );
+        const pathToHeader = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            'header_temp.html',
+        );
+        let content = fs.readFileSync(pathToHtml, 'utf8');
+        const pathToHeaderTemplate = fs.readFileSync(pathToHeader, 'utf8');
+        const curDate = new Date();
+        const validDate = yearLater(curDate);
+        content = replacer(content, {
+            PPP: company.ka_contract_number_temp || '',
+            AAA: company.name || '', // 默认公司名
+            BBB: company.legal_person || '', // 法人代表姓名
+            CCC: company.legal_identity || '', // 法人代表身份证号
+            DDD: company.contact_person || '', // 联系人姓名
+            EEE: company.contact_mobile || '', // || '联系人电话',
+            FFF: company.address || '', // 联系地址
+            GGG: company.settlement_type === 1 ? 2 : 1, // 结算方式 2周结 1预存 （settlement_type：0预存，1周结）
+            HHH: validDate.getFullYear(), // 有效期年
+            JJJ: validDate.getMonth() + 1, // 有效期月
+            KKK: validDate.getDate(), // 有效期日
+            YYYY: curDate.getFullYear(),
+            MM: curDate.getMonth() + 1,
+            DD: curDate.getDate(),
+            III: company.bank_name || '', // 甲方开户行：
+            OOO: company.bank_account_name || '', // 甲方银行账户名：
+            LLL: company.bank_account || '', // 甲方银行账号
+            MMM: company.alipay_account_name || '', // 甲方支付宝账户名
+            NNN: company.alipay_account || '', // 甲方支付宝账号,
+            QQQ: company.company_email || '', // 公司对接人邮箱,
+            RRR: company.company_contact || '', // 公司对接人微信或钉钉,
+            SSS: company.bank_address || '', //付款銀行地址
+            TTT: company.hk_bank_number || '', //銀行編號
+            UUU: company.hk_branch_bank_number || '', //分行編號
+            VVV: company.hk_swift_code || '', //付款銀行SWIFT Code
+            WWW: company.bank_account_name || '', //客户名称
+            STORES: company.stores
+                .filter((store) => store.verify_state != 1)
+                .map(
+                    (store, index) =>
+                        `<tr><td><p>${company.name}</p></td><td><p>${
+                        store.company_name_of_store || ''
+                        }</p></td><td><p>${store.name || ''}</p></td><td><p>${
+                        store.store_id || ''
+                        }</p></td><td><p>${
+                        store.business_category || ''
+                        }</p></td><td><p>${
+                        store.transport_type == 2 ? '香港-泰国' : '大陆-泰国'
+                        }</p></td><td><p>${store.comment || ''}</p></td></tr>`,
+                )
+                .join(''),
+        });
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        const page = await browser.newPage();
+        // const dayTime = `${curDate.getFullYear()}${curDate.getMonth() + 1}${curDate.getDate()}`;
+        await page.setContent(content);
+        // await page.goto(`file:${pathToHtml}`, { waitUntil: 'networkidle0' });
+        await page.pdf({
+            path: pdfPath,
+            format: 'a4',
+            margin: {
+                top: '120px',
+                left: '20px',
+                right: '20px',
+                bottom: '20px',
+            },
+            displayHeaderFooter: true,
+            headerTemplate: pathToHeaderTemplate,
+        });
+        await browser.close();
+    } catch (e) {
+        log.error(`生成pdf文件失败：${e.message}`);
+        return e.message;
+    }
+    return null;
+}
+#+end_src
+
+对比起来看你就会发现这里的重复问题了，其实完全可以将重复代码提取成为一个方法来调用的。
+
+#+begin_src typescript
+async function pdfExport(content, pathToHeaderTemplate) {
+    let replaceContent = replacer(content, {
+        PPP: company.ka_contract_number_temp || '',
+        AAA: company.name || '', // 默认公司名
+        BBB: company.legal_person || '', // 法人代表姓名
+        CCC: company.legal_identity || '', // 法人代表身份证号
+        DDD: company.contact_person || '', // 联系人姓名
+        EEE: company.contact_mobile || '', // || '联系人电话',
+        FFF: company.address || '', // 联系地址
+        GGG: company.settlement_type === 1 ? 2 : 1, // 结算方式 2周结 1预存 （settlement_type：0预存，1周结）
+        HHH: validDate.getFullYear(), // 有效期年
+        JJJ: validDate.getMonth() + 1, // 有效期月
+        KKK: validDate.getDate(), // 有效期日
+        YYYY: curDate.getFullYear(),
+        MM: curDate.getMonth() + 1,
+        DD: curDate.getDate(),
+        III: company.bank_name || '', // 甲方开户行：
+        OOO: company.bank_account_name || '', // 甲方银行账户名：
+        LLL: company.bank_account || '', // 甲方银行账号
+        MMM: company.alipay_account_name || '', // 甲方支付宝账户名
+        NNN: company.alipay_account || '', // 甲方支付宝账号,
+        QQQ: company.company_email || '', // 公司对接人邮箱,
+        RRR: company.company_contact || '', // 公司对接人微信或钉钉,
+        SSS: company.bank_address || '', //付款銀行地址
+        TTT: company.hk_bank_number || '', //銀行編號
+        UUU: company.hk_branch_bank_number || '', //分行編號
+        VVV: company.hk_swift_code || '', //付款銀行SWIFT Code
+        WWW: company.bank_account_name || '', //客户名称
+        STORES: company.stores
+            .map(
+                (store) =>
+                    `<tr><td><p>${company.name}</p></td><td><p>${
+                    store.company_name_of_store || ''
+                    }</p></td><td><p>${store.name || ''}</p></td><td><p>${
+                    store.store_id || ''
+                    }</p></td><td><p>${
+                    store.business_category || ''
+                    }</p></td><td><p>${
+                    store.transport_type == 2 ? '香港-泰国' : '大陆-泰国'
+                    }</p></td><td><p>${store.comment || ''}</p></td></tr>`,
+            )
+            .join(''),
+    });
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+    const page = await browser.newPage();
+    // const dayTime = `${curDate.getFullYear()}${curDate.getMonth() + 1}${curDate.getDate()}`;
+    await page.setContent(content);
+    // await page.goto(`file:${pathToHtml}`, { waitUntil: 'networkidle0' });
+    await page.pdf({
+        path: pdfPath,
+        format: 'a4',
+        margin: {
+            top: '120px',
+            left: '20px',
+            right: '20px',
+            bottom: '20px',
+        },
+        displayHeaderFooter: true,
+        headerTemplate: pathToHeaderTemplate,
+    });
+    await browser.close();
+}
+
+async function generatePdf(pdfPath, company: any = {}, config: any = {}) {
+    try {
+        const pathToHtml = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign
+                ? 'contract_temp_esign.html'
+                : 'contract_temp.html',
+        );
+        const pathToHeader = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign ? 'header_temp.html' : 'header_temp_hk.html',
+        );
+        console.log('pathToHtml----pathToHeader----',pathToHtml,'----',pathToHeader,'-----',process.cwd());
+        let content = fs.readFileSync(pathToHtml, 'utf8');
+        const pathToHeaderTemplate = fs.readFileSync(pathToHeader, 'utf8');
+        const curDate = new Date();
+        const validDate = yearLater(curDate);
+        await pdfExport(content, pathToHeaderTemplate);
+    } catch (e) {
+        log.error(`生成pdf文件失败：${e.message}`);
+        console.log('生成pdf文件失败：',e);
+        return e.message;
+    }
+    return null;
+}
+
+async function generatePdfFbl(pdfPath, company: any = {}, config: any = {}) {
+    try {
+        const pathToHtml = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            config && config.isEsign
+                ? 'contract_temp_esign_fbl.html'
+                : 'contract_temp_fbl.html',
+        );
+        const pathToHeader = path.join(
+            process.cwd(),
+            'dist',
+            'assets',
+            'header_temp.html',
+        );
+        let content = fs.readFileSync(pathToHtml, 'utf8');
+        const pathToHeaderTemplate = fs.readFileSync(pathToHeader, 'utf8');
+        const curDate = new Date();
+        const validDate = yearLater(curDate);
+        await pdfExport(content, pathToHeaderTemplate);
+    } catch (e) {
+        log.error(`生成pdf文件失败：${e.message}`);
+        return e.message;
+    }
+    return null;
+}
+#+end_src
+
+** 反复出现的字符串文字最好定义为字符串常量
+
+例子同样举上一段的， ='header_temp.html'= 、 ='dist'= 、 ='assets'= 等都重复了多次。这些重复的字符串会给重构带来麻烦，因为必须要确保相关更新必须覆盖到，而用常量定义就可以一次修改到处生效。
+
+这里就不举例子了。
+
+** 高认知复杂度
+
+
+先讲一下认知复杂度。
+
+*** 复杂度得分的来源
+
+我们从上述原则中抽象出如下几个不同的类型作为得分的来源：
+
+#+begin_quote
+A. Nesting：把一段代码逻辑嵌套在另一段逻辑中;
+
+B. Structural：被嵌套的控制流结构;
+
+C. Fundamental： 不受嵌套影响的语句；
+
+D. Hybrid：一些控制流结构，但不包含在嵌套中；
+#+end_quote
+
+具体的内容解释有点抽象，我们将结合后续代码进行理解。
+
+*** 复杂度的具体评估
+
+**** 忽略语法糖带来的简写
+
+在认知复杂度的制定想法中，一个指导性的原则是：激励使用者写出好的编码规范。也就是说，需要无视或低估让代码更可读的 feature（不计算进复杂度）。
+
+举个例子：
+
+#+begin_src javascript
+  let myObj = null;
+  if (a !== null) {
+      myObj = a.myObj;
+  }
+#+end_src
+
+其认知复杂度将会 +1 。
+
+#+begin_src javascript
+  let myObj = a?.myObj;
+#+end_src
+
+认知复杂度不变。
+
+二者的代码是等效的，但后者可能要理解一下，不过，一旦理解了这种语法(null-coalescing)，后者的代码就变得直观了起来，同时代码也变得简洁。出于这样的原因，计算认知复杂度时就会忽略掉 null-coalescing 操作。
+
+**** 打断线性代码流程导致复杂度增加
+
+在认知复杂度的制定想法中，另一项指导原则是：结构控制会打断一条线性的流从头到尾走完，使代码的维护者需要花更大功夫来理解代码。在认定了这会导致额外负担的前提下，认知复杂度评估了以下几种会增加复杂度的 Structural 类型：
+
+- 循环：=for=，=while=，=do=，=while= ......
+- 条件：三元运算符，=if=，=#if=，=#ifdef=......
+
+还有一下 Hybrid 类型：=else if=，=elif=，=else= ......
+
+这些 Hybrid 类型不计入 Nesting 类型里面，因为在 =if= 的时候已经计算了。
+
+除了这些与圈复杂度类似的计算方式，还会额外计算：
+
+***** Catches
+
+一个 catch 表达了控制流的一个分支，就像 if 一样。因此每个 catch 语句都会增加 Structural 类的认知复杂度，仅加 1 分，无论它 catch 住多少种异常。（在我们的计算中 try/finally 被直接忽略掉）
+
+***** Switches
+
+一个 switch 语句，和它附带的全部 case 绑在一起记为一个 Structural 类，来增加复杂度
+
+在圈复杂度下，一个 switch 语句被视为一系列的 if-else 链，因此每个 case 都会增加复杂度，因为会使得控制流分支增多。
+
+但以代码维护的视角来看，一个 switch：将单个变量与一组显式的值比较，要比 if-else 链易于理解，因为 if-else 链可以用任意条件做比较。就是说 if-else if 链必须仔细的逐个阅读条件，而 switch 通常是可以一目了然的。
+
+***** 一系列的逻辑操作
+
+认知复杂度不对每一个逻辑运算符计分，而是考虑对连续的一组逻辑操作加分。比如一下代码是不加分的：
+
+#+begin_src javascript
+  a && b
+  a && b && c && d
+  a || b
+  a || b || c || d
+#+end_src
+
+理解后一行并不比前一行困难，但对于下面两行，理解难度有质的区别：
+
+#+begin_src javascript
+  a && b && c && d
+  a || b && c || d
+#+end_src
+
+boolean 操作表达式混合使用会打断人之前的思维，使得理解更为困难，因此对此类操作没出现一个，认知复杂度都会不断递增。例如：
+
+#+begin_example
+  if (a              // +1 for if
+      && b && c      // +1
+      || d || e      // +1
+      && f)          // +1
+#+end_example
+
+#+begin_example
+  if (a              // +1 for if
+     &&              // +1
+     !(b && c))      // +1
+#+end_example
+
+***** 递归
+
+与圈复杂度不同，认知复杂度对每一个递归调用，都增加一点 Fundamental 类复杂计分，不论是直接还是间接的。有两个这样做的动机：
+
+- 递归表达了一种"元循环"，并且循环会增加认知复杂度；
+- 认知复杂度希望能用于估计一个方法，其控制流难以理解的程度，而即使是一些有经验的程序员，都觉得递归难以理解；
+
+***** Jumps to labels
+
+goto 增加了认知复杂度，因为 do、break、continue 等标签和其他多级跳转（例如 break 或 continue）已经在某些语言中找到了确切的位置。但是，由于提早返回通常可以使代码更清晰，因此没有其他跳跃或提早退出引起增量。
+
+**** 嵌套打断思路造成的复杂度增加
+
+一种非常直观的感受，即相比连续嵌套的五个结构，线性连续的五个 if 或 for 会好理解的多，因此，认知复杂度在计算时会将其视为一个 Nesting 类型的增加。特别地，每增加一个嵌套，就会增加一个 Nesting 。我们直接看例子：
+
+#+begin_src javascript
+  try {
+      if (condition1) {                     // +1
+          for (int i = 0; i < 10; i++) {    // +2 (nesting=1)
+              while (condition2) {}         // +3 (nesting=2)
+          }
+      }
+  } catch (e) {                             // +1
+      if (condition2) {}                    // +2 (nesting=1)
+  }                                         // total 9
+#+end_src
+
+*** 认知复杂度的意义
+
+认知复杂度制定的主要目标，是为方法计算出一个得分，准确地反应出此方法的相对理解难度。它的次要目标，是解决现代语言结构的问题，并产生在方法级别以上也有价值的指标。编写和维护代码是一个人为过程，它们的输出必须遵守数学模型，但它们本身不适合数学模型。这就是为什么数学模型不足以评估其所需的工作量的原因。
+
+认知复杂性不同于使用数学模型评估软件可维护性的实践。它从圈复杂度设定的先例开始，但是使用人工判断来评估应如何对结构进行计数，并决定应向模型整体添加哪些内容。结果，它得出的方法复杂性得分比以前的模型更能吸引程序员，因为它们是对可理解性的更公平的相对评估。此外，由于认知复杂性不收取任何方法的"入门成本"，因此它不仅在方法级别，而且在类和服务级别，都产生了更加准确的评估结果。
+
+*** 表驱动编程法
+
+#+begin_quote
+  数据比程序逻辑更易驾驭。尽可能把设计的复杂度从代码转移至数据是个好实践。------《 Unix 编程艺术》
+#+end_quote
+
+最后讲一下表驱动编程法，这是一个很好的降低认知复杂度的方法，但第一眼往往不太直观。
+
+我们举个例子：
+
+#+begin_src javascript
+  const { id, name, status, address } = res.body;
+  let update = {};
+  if (id !== undefined && id !== null) {
+      update.id = id;
+  }
+  if (name !== undefined && name !== null) {
+      update.name = name;
+  }
+  if (status !== undefined && status !== null) {
+      update.status = status;
+  }
+  if (address !== undefined && address !== null) {
+      update.address = address;
+  }
+#+end_src
+
+我们发现我们的几处 =if= 结构类似，这里隐隐提示我们这里存在着优化的可能，在这里我们尝试用表驱动编程法去优化该段代码：
+
+#+begin_src javascript
+  let update = {};
+  for (const field of ['id', 'name', 'status', 'address']) {
+      const t = res.body[field];
+      if (t !== undefined && t !== null) {
+          update[field] = t;
+      }
+  }
+#+end_src
+
+代码就短很多了。
+
+后一段代码不直观的原因在于它更抽象了，它将数据与逻辑抽离，但我们因此得到了好处。因为前一段代码的逻辑冗余，使得每多加一个字段的校验，就得多写一段 =if= 去处理，如果需要校验的字段足够多，我们就根本无法从这些代码里直观得到代码逻辑的相似之处，最终因为坚持直观而丧失了直观。后一段的优点在于，这里的逻辑复杂度并没有增加，复杂的是数据，而且，比起逻辑， *人更擅长处理数据* 。

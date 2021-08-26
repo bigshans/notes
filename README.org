@@ -22,6 +22,7 @@
 - [[file:study/golang.org][golang.org]]
 - [[file:study/java-offer.org][java-offer.org]]
 - [[file:study/angluar.org][angular.org]]
+- [[file:study/经济学原理-微观经济学.org][经济学原理-微观经济学]]
 
 ** work
 
