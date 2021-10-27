@@ -23,7 +23,7 @@
 - [[file:study/经济学原理-微观经济学.org][经济学原理-微观经济学]]
 ** work
 
-- [[./work/codeQuality.org][codeQuailty.org]]
+- [[file:work/codeQuality.org][codeQuailty.org]]
 ** philosophy
 
-- [[./philosophy/纯粹理性批判.org][纯粹理性批判.org]]
+- [[file:philosophy/纯粹理性批判.org][纯粹理性批判.org]]
