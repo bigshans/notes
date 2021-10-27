@@ -7,13 +7,13 @@
 * INDEX
 ** study
 
-- [[./study/spring.org][spring.org]] (Spring framework study notes)
-- [[./study/git.org][git.org]] (Some knowledge about git)
-- [[./study/javascript.org][javascript.org]] (Based knowledge of javascript)
-- [[./study/typescript.org][typescript.org]] (Based knowledge of javascript)
-- [[./study/vimscript.org][vimscript.org]] (Hard way learn vimscript)
-- [[./study/docker.org][docker.org]]
-- [[./study/haskell.org][haskell.org]]
+- [[file:study/spring.org][spring.org]] (Spring framework study notes)
+- [[file:study/git.org][git.org]] (Some knowledge about git)
+- [[file:study/javascript.org][javascript.org]] (Based knowledge of javascript)
+- [[file:study/typescript.org][typescript.org]] (Based knowledge of javascript)
+- [[file:study/vimscript.org][vimscript.org]] (Hard way learn vimscript)
+- [[file:study/docker.org][docker.org]]
+- [[file:study/haskell.org][haskell.org]]
 - [[file:study/canvas.org][canvas.org]]
 - [[file:study/elisp.org][elisp.org]]
 - [[file:study/npy.org][npy.org]]
