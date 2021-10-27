@@ -1,5 +1,7 @@
 * canvas 学习笔记
-
+:PROPERTIES:
+:collapsed: true
+:END:
 ** basic template
    
    #+begin_src html
@@ -18,5 +20,3 @@
        <canvas id="canvas"></canvas>
      </body>
    #+end_src
-
-   
