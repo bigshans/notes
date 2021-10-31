@@ -21,6 +21,8 @@
 - [[file:study/java-offer.org][java-offer.org]]
 - [[file:study/angluar.org][angular.org]]
 - [[file:study/经济学原理-微观经济学.org][经济学原理-微观经济学]]
+- [[file:study/pandas.org][pands 入门]]
+- [[file:study/rust-quickly-begin.org][rust 入门]]
 ** work
 
 - [[file:work/codeQuality.org][codeQuailty.org]]
