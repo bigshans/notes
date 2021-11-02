@@ -274,6 +274,245 @@ print(df['20130102': '20130104'])
 """
 #+end_src
 
-** 更复杂的筛选
+** 根据标签筛选
 
-=loc= 可以让我们使用标签来选择数据
+=loc= 可以让我们使用标签来选择数据，上面我们展示过了一部分。
+
+#+begin_src python
+print(df.loc[:, ['A', 'B']])
+print(df.loc['20130102', ['A', 'B']])
+#+end_src
+
+上面都是选取某某行的某某列。
+
+** 根据序列筛选
+
+使用 =iloc= 可以根据位置截取数据。
+
+#+begin_src python
+print(df.iloc[3, 1])
+print(df.iloc[3:5, 1:3])
+print(df.iloc[[1, 3, 5], 1:3])
+#+end_src
+
+** 混合模式
+
+我们可以混合使用以上两种方法。
+
+#+begin_src python
+print(df.iloc[:3].loc[:, 'A':'C'])
+#+end_src
+
+** 条件筛选
+
+#+begin_src python
+print(df[df.A > 8])
+#+end_src
+* 数据设置
+
+#+begin_src python
+dates = pd.date_range('20130101', periods=6)
+df = pd.DataFrame(np.arange(24).reshape((6, 4), index=dates, columns=['A', 'B', 'C', 'D']))
+
+"""
+             A   B   C   D
+2013-01-01   0   1   2   3
+2013-01-02   4   5   6   7
+2013-01-03   8   9  10  11
+2013-01-04  12  13  14  15
+2013-01-05  16  17  18  19
+2013-01-06  20  21  22  23
+"""
+#+end_src
+
+** 选取位置设置数据
+
+利用之前数据筛选的知识，我们可以选取位置进行替换：
+
+#+begin_src python
+df.iloc[2, 2] = 111
+df.loc['20130101', 'B'] = 222
+df.B[df.A > 4] = 0
+df['F'] = np.nan
+#+end_src
+** 添加数据
+
+我们可以加上一列长度对齐的 =Series= 序列。
+
+#+begin_src python
+df['E'] = pd.Series([1, 2, 3, 4, 5, 6],, index=pd.date_range('20130101', periods=6))
+#+end_src
+* 处理丢失数据
+
+#+begin_src python
+dates = pd.date_range('20130101', periods=6)
+df = pd.DataFrame(np.arange(24).reshape((6,4)),index=dates, columns=['A','B','C','D'])
+df.iloc[0,1] = np.nan
+df.iloc[1,2] = np.nan
+"""
+             A     B     C   D
+2013-01-01   0   NaN   2.0   3
+2013-01-02   4   5.0   NaN   7
+2013-01-03   8   9.0  10.0  11
+2013-01-04  12  13.0  14.0  15
+2013-01-05  16  17.0  18.0  19
+2013-01-06  20  21.0  22.0  23
+"""
+#+end_src
+
+** =pd.isnull()=
+
+判断是否有缺失数据 =NaN= ， =True= 表示缺失数据。
+
+#+begin_src python
+df.isnull()
+"""
+                A      B      C      D
+2013-01-01  False   True  False  False
+2013-01-02  False  False   True  False
+2013-01-03  False  False  False  False
+2013-01-04  False  False  False  False
+2013-01-05  False  False  False  False
+2013-01-06  False  False  False  False
+"""
+#+end_src
+
+检测数据中是否存在 =NaN= ，如果存在就返回 =True= 。
+
+#+begin_src python
+np.any(df.isnull()) == True
+#+end_src
+
+** =pd.dropna()= 和 =pd.fillna()=
+
+=pd.dropna()= 可以直接去除带有 =NaN= 的行或列。
+
+#+begin_src python
+df.dropna(
+    axis = 0, # 0: 对行，1: 对列
+    how='any' # 'any': 只要存在 NaN 就去除， 'all'：必须全部都是 NaN 才去除
+)
+#+end_src
+
+=pd.fillna()=
+
+将 =NaN= 的值用其他值代替，比如代替成 0 。
+
+#+begin_src python
+df.fillna(value=0)
+#+end_src
+* 导入导出
+
+** 导入
+
+#+begin_src python
+data = pd.read_pickle('student.pickle')
+data = pd.read_csv('student.csv')
+data = pd.read_excel('student.xlsx')
+#+end_src
+
+** 导出
+
+#+begin_src python
+data.to_pickle('student.pickle')
+data.to_csv('student.csv')
+data.to_excel('student.xlsx')
+#+end_src
+* 合并 =concat=
+
+#+begin_src python
+df1 = pd.DataFrame(np.ones((3,4))*0, columns=['a','b','c','d'])
+df2 = pd.DataFrame(np.ones((3,4))*1, columns=['a','b','c','d'])
+df3 = pd.DataFrame(np.ones((3,4))*2, columns=['a','b','c','d'])
+s1 = pd.Series([1, 2, 3, 4], columns=['a', 'b', 'c', 'd'])
+
+res = pd.concat(
+    [df1, df2, df3], # 合并数据
+    axis=0, # 0: 纵向合并 1：横向合并
+    index_ignore=True, # 默认 False ，是否重置 index
+    join='inner' # 合并方式，默认 'outer'，外连接，取索引并集，内连接取索引交集
+)
+res = df1.append(
+    [df2, df3], # 合并数据，可以是 DataFrame ，也可以是 Series 。
+    ignore_index=True
+)
+#+end_src
+* 合并 =merge=
+
+#+begin_src python
+left = pd.DataFrame({'key': ['K0', 'K1', 'K2', 'K3'],
+                             'A': ['A0', 'A1', 'A2', 'A3'],
+                             'B': ['B0', 'B1', 'B2', 'B3']})
+right = pd.DataFrame({'key': ['K0', 'K1', 'K2', 'K3'],
+                              'C': ['C0', 'C1', 'C2', 'C3'],
+                              'D': ['D0', 'D1', 'D2', 'D3']})
+# 按键值进行简单合并
+print(pd.merge(left, right, on='key'))
+#+end_src
+
+#+begin_src python
+left = pd.DataFrame({'key1': ['K0', 'K0', 'K1', 'K2'],
+                      'key2': ['K0', 'K1', 'K0', 'K1'],
+                      'A': ['A0', 'A1', 'A2', 'A3'],
+                      'B': ['B0', 'B1', 'B2', 'B3']})
+right = pd.DataFrame({'key1': ['K0', 'K1', 'K1', 'K2'],
+                       'key2': ['K0', 'K0', 'K0', 'K0'],
+                       'C': ['C0', 'C1', 'C2', 'C3'],
+                       'D': ['D0', 'D1', 'D2', 'D3']})
+
+# 多键值合并
+print(pd.merge(
+    left, right, # 需要合并的 df
+    on=['key1', 'key2'], # 按 key1-key2 做类分
+    how='inner')) # inner outer right left
+#+end_src
+
+#+begin_src python
+df1 = pd.DataFrame({'col1':[0,1], 'col_left':['a','b']})
+df2 = pd.DataFrame({'col1':[1,2,2],'col_right':[2,2,2]})
+
+print(pd.merge(df1, df2, on='col1', how='outer', indicator=True)) # indicator为 True 将会展示合并方式。
+'''
+   col1 col_left  col_right      _merge
+0     0        a        NaN   left_only
+1     1        b        2.0        both
+2     2      NaN        2.0  right_only
+3     2      NaN        2.0  right_only
+'''
+print(pd.merge(df1, df2, on='col2', how='outer', indicator='indicator_column'))
+'''
+   col1 col_left  col_right indicator_column
+0     0        a        NaN        left_only
+1     1        b        2.0             both
+2     2      NaN        2.0       right_only
+3     2      NaN        2.0       right_only
+'''
+#+end_src
+
+#+begin_src python
+left = pd.DataFrame({'A': ['A0', 'A1', 'A2'],
+                     'B': ['B0', 'B1', 'B2']},
+                     index=['K0', 'K1', 'K2'])
+right = pd.DataFrame({'C': ['C0', 'C2', 'C3'],
+                      'D': ['D0', 'D2', 'D3']},
+                     index=['K0', 'K2', 'K3'])
+
+print(pd.merge(left, right, left_index = True, right_index = True, how='outer'))
+
+print(pd.merge(left, right, left_index = True, right_index = True, how='inner'))
+#+end_src
+
+去除重复。
+
+#+begin_src python
+#定义资料集
+boys = pd.DataFrame({'k': ['K0', 'K1', 'K2'], 'age': [1, 2, 3]})
+girls = pd.DataFrame({'k': ['K0', 'K0', 'K3'], 'age': [4, 5, 6]})
+
+#使用suffixes解决overlapping的问题
+res = pd.merge(boys, girls, on='k', suffixes=['_boy', '_girl'], how='inner')
+print(res)
+#    age_boy   k  age_girl
+# 0        1  K0         4
+# 1        1  K0         5
+#+end_src
