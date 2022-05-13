@@ -613,7 +613,28 @@ struct Color(i32, i32, i32);
 let black = Color(0, 0, 0);
 #+end_src
 
-*** 枚举
+** 结构体方法拓展
+
+rust 结构体可以拓展方法，使得 rust 可以更加面向对象。
+
+rust 可以有静态方法和非静态方法。
+
+#+begin_src rust
+struct MyStruct {}
+
+impl MyStruct {
+    // static method
+    fn static_method() {
+        // code define
+    }
+    // unstatic method
+    fn method(&self) {
+        // code define
+    }
+}
+#+end_src
+
+** 枚举
 我们使用 =enum= 来定义枚举，例如
 
 #+begin_src rust
@@ -647,7 +668,7 @@ let loopback = IpAddr:V6(String::from("::1"));
 事实上，你会问这样定义枚举又什么意义？ Rust 中的枚举其实是为了 =match=
 控制准备的。
 
-*** =match= 模式匹配
+** =match= 模式匹配
 Rust 有一个叫做 match
 的极为强大的控制流运算符，它允许我们将一个值与一系列的模式相比较，并根据相匹配的模式执行相应代码。模式可由字面值、变量、通配符和许多其他内容构成。match
 的力量来源于模式的表现力以及编译器检查，它确保了所有可能的情况都得到处理。我们目前讲得比较简单。
@@ -694,7 +715,7 @@ fn main() {
 =_= 在次是用来兜底的，相当于 =default= ， Rust
 会穷尽所有的模式，如果又代码没有处理完成就会报错。
 
-*** =Option=
+** =Option=
 =Option= 是 Rust 标准库里的一个枚举。它的定义如下：
 
 #+begin_src rust
@@ -726,7 +747,7 @@ fn main() {
 }
 #+end_src
 
-*** =if let= 简单控制流
+** =if let= 简单控制流
 =if let= 语法让我们以一种不那么冗长的方式结合 =if= 和 =let=
 ，来处理只匹配一个模式的值而忽略其他模式的情况。考虑下面的例程，它匹配一个
 =Option<u8>= 值并只希望当值为 3 时执行代码：
@@ -796,19 +817,450 @@ cargo run # Hello, world!
 目录，前者记录了项目的一些基本信息和项目的依赖，后者就是项目的 Rust
 源码了。
 
-*** 模块和权限控制
-Rust 中的组织单位是模块。
+*** 添加依赖
+
+默认 Cargo 其实是不能添加依赖的，我们需要借助 cargo-edit 去增强。
+
+#+begin_src shell
+cargo install cargo-edit
+#+end_src
+
+之后我们就能像 npm 一样安装依赖了。
+
+#+begin_src shell
+cargo add rand
+#+end_src
+
+** 模块和权限控制
+
+Rust 的模块系统非常的令人困惑，在单文件里面还算好理解，但分文件其实就挺麻烦的了，而官方也没有讲得十分清楚。
+
+首先拿单文件举例。
 
 #+begin_src rust
-mod nation {
-    mod government {
-        fn govern() {}
-    }
-    mod congress {
-        fn legislate() {}
-    }
-    mod court {
-        fn judicial() {}
-    }
+pub mod movies {
+   pub fn play(name:String) {
+      println!("Playing movie {}",name);
+   }
+}
+fn main(){
+   movies::play("Herold and Kumar".to_string());
 }
 #+end_src
+
+#+RESULTS:
+: Playing movie Herold and Kumar
+
+默认权限为 private ，除非使用 =pub= 进行修饰。
+
+*** 文件拆分模块
+
+首先看一下文件结构。
+
+#+begin_example
+.
+├── Cargo.toml
+└── src
+    ├── main.rs
+    ├── movies
+    │   └── comedy.rs
+    └── movies.rs
+#+end_example
+
+我们有一个 module 和一个 submodule ， module 名字与文件名同名。
+
+=main.rs=
+#+begin_src rust
+pub mod movies;
+
+fn main() {
+    movies::play("Herold and Kumar".to_string());
+    movies::comedy::haha();
+}
+#+end_src
+
+=movies.rs=
+#+begin_src rust
+pub mod comedy;
+
+pub fn play(name: String) {
+    println!("Playing movie {}", name);
+}
+#+end_src
+
+=comedy.rs=
+#+begin_src rust
+pub fn haha() {
+    println!("Hahahahaha!");
+}
+#+end_src
+
+你可能还知道 =lib.rs= ，这个文件主要是库的入口，如果你不暴露作库的，可以不用这个。
+
+** 常用的容器
+
+主要是 vector 、 hashmap 和 hashset 。
+
+*** vector
+
+- 常用方法：
+
+| 方法     | 作用           |
+|----------+----------------|
+| new      | 创建 vector    |
+| push     | 追加元素到末尾 |
+| remove   | 删除元素       |
+| contains | 是否包含给定值 |
+| len      | 使用大小       |
+
+- 创建 vector ：
+
+  #+begin_src rust
+fn main() {
+    let mut v = Vec::new();
+    v.push(20);
+    v.push(30);
+    v.push(40);
+
+    println!("size of vector is :{}", v.len());
+    println!("{:?}", v);
+}
+  #+end_src
+
+  #+RESULTS:
+  : size of vector is :3
+  : [20, 30, 40]
+
+  我们也可以使用宏来创建。
+
+  #+begin_src rust
+fn main() {
+    let v = vec![1, 2, 3, 4];
+    println!("{:?}", v);
+}
+  #+end_src
+
+  #+RESULTS:
+  : [1, 2, 3, 4]
+
+  注意， vector 不是元组，是列表，所以必须是相同类型。
+
+ - 添加元素 - =push=
+
+   这个上面演示了。
+
+- 删除元素
+
+  #+begin_src rust
+fn main() {
+    let mut v = vec![10, 20, 30];
+    v.remove(1);
+    println!("{:?}", v);
+}
+  #+end_src
+
+  #+RESULTS:
+  : [10, 30]
+
+- 是否包含 - =contains=
+
+  #+begin_src rust
+fn main() {
+   let v = vec![10,20,30];
+   if v.contains(&10) {
+      println!("found 10");
+   }
+   println!("{:?}",v);
+}
+  #+end_src
+
+  #+RESULTS:
+  : found 10
+  : [10, 20, 30]
+
+- 查看长度 - =len=
+
+  #+begin_src rust
+fn main() {
+   let v = vec![1,2,3];
+   println!("size of vector is :{}",v.len());
+}
+  #+end_src
+
+- 遍历
+
+  #+begin_src rust
+fn main() {
+   let mut v = Vec::new();
+   v.push(20);
+   v.push(30);
+   v.push(40);
+   v.push(500);
+
+   for i in &v {
+      println!("{}",i);
+   }
+   println!("{:?}",v);
+}
+  #+end_src
+
+  #+RESULTS:
+  : 20
+  : 30
+  : 40
+  : 500
+  : [20, 30, 40, 500]
+
+*** hasmap
+
+| 方法         | 作用                 |
+|--------------+----------------------|
+| insert       | 插入一对键值对       |
+| len          | 返回容器中的元素数量 |
+| get          | 获取元素             |
+| iter         | 获取迭代器           |
+| contains_key | 是否包含键值         |
+| remove       | 移除一对键值对       |
+
+- 插入
+
+  #+begin_src rust
+use std::collections::HashMap;
+
+fn main() {
+    let mut stateCodes = HashMap::new();
+    stateCodes.insert("KL", "Kerala");
+    println!("{:?}", stateCodes);
+}
+  #+end_src
+
+  #+RESULTS:
+  : {"KL": "Kerala"}
+
+- len
+
+  #+begin_src rust
+use std::collections::HashMap;
+fn main() {
+   let mut stateCodes = HashMap::new();
+   stateCodes.insert("KL","Kerala");
+   stateCodes.insert("MH","Maharashtra");
+   println!("size of map is {}",stateCodes.len());
+}
+  #+end_src
+
+  #+RESULTS:
+  : size of map is 2
+
+- get
+
+  #+begin_src rust
+use std::collections::HashMap;
+fn main() {
+   let mut stateCodes = HashMap::new();
+   stateCodes.insert("KL","Kerala");
+   stateCodes.insert("MH","Maharashtra");
+   println!("size of map is {}",stateCodes.len());
+   println!("{:?}",stateCodes);
+
+   match stateCodes.get(&"KL") {
+      Some(value)=> {
+         println!("Value for key KL is {}",value);
+      }
+      None => {
+         println!("nothing found");
+      }
+   }
+}
+  #+end_src
+
+  #+RESULTS:
+  : size of map is 2
+  : {"KL": "Kerala", "MH": "Maharashtra"}
+  : Value for key KL is Kerala
+
+- iter
+
+  #+begin_src rust
+use std::collections::HashMap;
+fn main() {
+   let mut stateCodes = HashMap::new();
+   stateCodes.insert("KL","Kerala");
+   stateCodes.insert("MH","Maharashtra");
+
+   for (key, val) in stateCodes.iter() {
+      println!("key: {} val: {}", key, val);
+   }
+}
+  #+end_src
+
+  #+RESULTS:
+  : key: KL val: Kerala
+  : key: MH val: Maharashtra
+
+- contains_key
+
+  #+begin_src rust
+use std::collections::HashMap;
+fn main() {
+   let mut stateCodes = HashMap::new();
+   stateCodes.insert("KL","Kerala");
+   stateCodes.insert("MH","Maharashtra");
+   stateCodes.insert("GJ","Gujarat");
+
+   if stateCodes.contains_key(&"GJ") {
+      println!("found key");
+   }
+}
+  #+end_src
+
+- remove
+
+  #+begin_src rust
+use std::collections::HashMap;
+fn main() {
+   let mut stateCodes = HashMap::new();
+   stateCodes.insert("KL","Kerala");
+   stateCodes.insert("MH","Maharashtra");
+   stateCodes.insert("GJ","Gujarat");
+
+   println!("length of the hashmap {}",stateCodes.len());
+   stateCodes.remove(&"GJ");
+   println!("length of the hashmap after remove() {}",stateCodes.len());
+}
+  #+end_src
+
+*** HashSet
+
+| 方法     | 作用           |
+|----------+----------------|
+| insert   | 插入值         |
+| len      | 获取数量       |
+| get      | 获取值的引用   |
+| iter     | 迭代器         |
+| contains | 查看值是否存在 |
+| remove   | 删除值         |
+
+- insert
+
+  #+begin_src rust
+use std::collections::HashSet;
+fn main() {
+   let mut names = HashSet::new();
+
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+   names.insert("Mohtashim");//duplicates not added
+
+   println!("{:?}",names);
+}
+  #+end_src
+
+  #+RESULTS:
+  : {"Kannan", "TutorialsPoint", "Mohtashim"}
+
+- len
+
+  #+begin_src rust
+use std::collections::HashSet;
+fn main() {
+   let mut names = HashSet::new();
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+   println!("size of the set is {}",names.len());
+}
+  #+end_src
+
+  #+RESULTS:
+  : size of the set is 3
+
+- iter
+
+  #+begin_src rust
+use std::collections::HashSet;
+fn main() {
+   let mut names = HashSet::new();
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+   names.insert("Mohtashim");
+
+   for name in names.iter() {
+      println!("{}",name);
+   }
+}
+  #+end_src
+
+  #+RESULTS:
+  : TutorialsPoint
+  : Mohtashim
+  : Kannan
+
+- get
+
+  #+begin_src rust
+use std::collections::HashSet;
+fn main() {
+   let mut names = HashSet::new();
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+   names.insert("Mohtashim");
+
+   match names.get(&"Mohtashim"){
+      Some(value)=>{
+         println!("found {}",value);
+      }
+      None =>{
+         println!("not found");
+      }
+   }
+   println!("{:?}",names);
+}
+  #+end_src
+
+  #+RESULTS:
+  : found Mohtashim
+  : {"TutorialsPoint", "Mohtashim", "Kannan"}
+
+- contains
+
+  #+begin_src rust
+use std::collections::HashSet;
+
+fn main() {
+   let mut names = HashSet::new();
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+
+   if names.contains(&"Kannan") {
+      println!("found name");
+   }
+}
+  #+end_src
+
+  #+RESULTS:
+  : found name
+
+- remove
+
+  #+begin_src rust
+use std::collections::HashSet;
+
+fn main() {
+   let mut names = HashSet::new();
+   names.insert("Mohtashim");
+   names.insert("Kannan");
+   names.insert("TutorialsPoint");
+   println!("length of the Hashset: {}",names.len());
+   names.remove(&"Kannan");
+   println!("length of the Hashset after remove() : {}",names.len());
+}
+  #+end_src
+
+  #+RESULTS:
+  : length of the Hashset: 3
+  : length of the Hashset after remove() : 2
