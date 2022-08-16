@@ -1264,3 +1264,369 @@ fn main() {
   #+RESULTS:
   : length of the Hashset: 3
   : length of the Hashset after remove() : 2
+** 错误处理
+
+错误处理是 Rust 中非常重要的一环， Rust 的错误处理可分为可回事的错误处理和不可恢复的错误处理。
+
+*** 不可恢复的错误处理 =panic!=
+
+=panic!= 宏将会产生一个不可恢复的错误。
+
+#+begin_src rust
+fn main() {
+    panic!("hello");
+    println!("End of main"); // 实际上无法到达
+}
+#+end_src
+
+#+begin_src rust
+fn main() {
+    let a = [10, 20, 30];
+    a[10]; // 这里将会引发一个 panic
+}
+#+end_src
+
+*** 可恢复的错误处理 =Result= 枚举
+
+=Result= 是一个枚举泛型。
+
+#+begin_src rust
+enum Result<T, E> {
+    OK(T),
+    Err(E)
+}
+#+end_src
+
+我们如何使用呢？
+
+#+begin_src rust
+use std::fs::File;
+
+fn main() {
+    let f = File::open("main.jpg"); // 返回的是一个 Result 类型
+    // 一般使用类型匹配进行错误处理
+    match f {
+        Ok(f) => {
+            println!("File found {:?}", f);
+        },
+        Err(e) => {
+            println!("File not dound \n{:?}", e);
+        }
+    }
+    println!("End of Main");
+}
+#+end_src
+
+#+RESULTS:
+: File not dound
+: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+: End of Main
+*** =unwrap= 和 =expect()=
+
+标准库内一般常用的错误处理枚举类型为 =Result= 和 =Option= ，但每次写错误处理未免太过繁琐，而且一些情况下并不是很必要，所以就提供了两个辅助方法来简化书写。
+
+| =unwrap= | 期待结果为 =Ok=/=Some= ，并返回包装在内的结果，如果为 =Err= 或者 =None= 则抛出 panic ，并将错误消息当作 panic 的内容。 |
+| =expect= | 与 =unwrap= 行为类似，但会在 panic 前输出错误本身。                                                                    |
+
+**** =unwrap()=
+
+#+begin_src rust
+fn is_even(no: i32) -> Result<bool, String> {
+    if no % 2 == 0 {
+        return Ok(true);
+    }
+    Err("NOT_AN_EVEN".to_string())
+}
+
+fn main() {
+    let result = is_even(10).unwrap();
+    println!("result is {}", result);
+    println!("End of main");
+}
+#+end_src
+
+#+RESULTS:
+: result is true
+: End of main
+
+如果调用为 =is_even(9)= ，则结果为：
+
+#+begin_example
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: "NOT_AN_EVEN"', fail.rs:9:29
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+#+end_example
+
+**** =expect()=
+
+#+begin_src rust
+use std::fs::File;
+fn main() {
+    let f = File::open("pqr.txt").expect("File not able to open");
+    println!("End of main");
+}
+#+end_src
+
+#+RESULTS:
+: thread 'main' panicked at 'File not able to open: Os { code: 2, kind: NotFound, message: "No such file or directory" }', src/main.rs:4:35
+
+注意报错内容上两者的区别。
+
+** 泛型
+
+Rust 使用 =<T>= 语法来表示泛型。之前我们已经接触过一些泛型了，比如 =Vec= 、 =Result= 、 =Option= 等。
+
+*** 泛型结构体
+
+#+begin_src rust
+struct Data<T> {
+    value: T,
+}
+
+fn main() {
+    let t: Data<i32> = Data{value: 350};
+    println!("Value is :{}", t.value);
+}
+#+end_src
+
+=<T>= 是泛型的类型参数语法，我们也可以实现多个参数的泛型语法。
+
+如果我们不使用 =<T>= ，那就是简单的结构体声明。
+
+*** Traits
+
+trait 更类似于其他语言中的 interface 的概念。
+
+#+begin_src rust
+trait some_trait {
+    fn method1(&self); // 抽象方法
+    fn method2(&self); { // 默认实现
+        // some code
+    }
+}
+#+end_src
+
+Result 的 trait 可以声明默认方法。
+
+**** implement 一个 trait
+
+#+begin_src rust
+impl some_trait for struct_name {
+    fn method1(&self) {}
+}
+#+end_src
+
+**** 泛型函数
+
+该示例定义了一个通用函数，该函数显示传递给它的参数。 参数可以是任何类型。 参数的类型应该实现 =Display= trait，以便它的值可以被 =println!= 宏打印出来。
+
+#+begin_src rust
+use std::fmt::Display;
+
+fn print_pro<T: Display>(t: T) {
+    println!("Inside print_pro generic function.");
+    println!("{}", t);
+}
+
+fn main() {
+    print_pro(10 as u8);
+    print_pro(20 as u8);
+    print_pro("Hello TutorialsPoint");
+}
+#+end_src
+
+#+RESULTS:
+: Inside print_pro generic function.
+: 10
+: Inside print_pro generic function.
+: 20
+: Inside print_pro generic function.
+: Hello TutorialsPoint
+
+** 输入输出
+
+*** 标准输入输出
+
+- 标准输入
+
+  #+begin_src rust
+fn main() {
+    let mut line = String::new();
+    println!("Enter your name: ");
+    let b1 = std::io::stdin().read_line(&mut line).unwrap();
+    println!("Hello, {}", line);
+    println!("no of bytes read, {}", b1);
+}
+  #+end_src
+
+- 标准输出
+
+  #+begin_src rust
+use std::io::Write;
+fn main() {
+    std::io::stdout().write("Tutorials".as_bytes()).unwrap();
+}
+  #+end_src
+
+  #+RESULTS:
+  : Tutorials
+*** 命令行参数
+
+#+begin_src rust
+fn main() {
+    let cmd_line = std::env::args();
+    println!("No of elements in arguments is :{}", cmd_line.len());
+    for arg in cmd_line {
+        println!("[{}]", arg);
+    }
+}
+#+end_src
+
+#+RESULTS:
+: No of elements in arguments is :1
+: [target/debug/cargoA1P7Q7]
+*** 文件输入输出
+
+- 写入文件
+
+  #+begin_src rust
+use std::io::Write;
+
+fn main() {
+    let mut file = std::fs::File::create("data.text").expect("create failed");
+    file.write_all("Hello World".as_bytes()).expect("write failed");
+    file.write_all("\nTutorialPoint".as_bytes().expect("write failed"));
+    println!("data written to file");
+}
+  #+end_src
+
+- 读取文件
+
+  #+begin_src rust
+use std::io::Read;
+
+fn main() {
+    let mut file = std::fs::File::open("data.txt").unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    print!("{}", contents);
+}
+  #+end_src
+
+- 删除文件
+
+  #+begin_src rust
+use std::fs;
+
+fn main() {
+    fs.remove_file("data.txt").expect("could not remove file");
+    println!("file is removed");
+}
+  #+end_src
+
+- 追加文件数据
+
+  #+begin_src rust
+use std::fs::OpenOptions;
+use std::io:Write;
+
+fn main() {
+    let mut file = OpenOptions::new().append(true).open("data.txt").expect("cannot open file");
+    file.write_all("Hello World".as_bytes()).expect("write failed");
+    file.write_all("\nTutorialPoint".as_bytes().expect("write failed"));
+    println!("file append success");
+}
+  #+end_src
+
+- 复制文件
+
+  #+begin_src rust
+use std::io::Read;
+use std::io::Write;
+
+fn main() {
+    let mut command_line: std::env::Args = std::env::args();
+    command_line.next().unwrap();
+    let source = command_line.next().unwrap();
+    let mut file_in = std::fs::File::open(source).unwrap();
+    let mut file_out = std::fs::File::create(destination).unwrap();
+    let mut buffer = [0u8; 4096];
+    loop {
+        let nbytes = file_in.read(&mut buffer).unwrap();
+        file_out.write(&buffer[..nbytes]).unwrap();
+        if nbytes < buffer.len() { break; }
+    }
+}
+  #+end_src
+
+
+** 迭代器
+
+- 如何使用迭代器
+
+  #+begin_src rust
+fn main() {
+    let a = [10, 20, 30];
+    let mut iter = a.iter();
+    println!("{:?}", iter);
+    println!("{:?}", iter.next());
+    println!("{:?}", iter.next());
+    println!("{:?}", iter.next());
+    println!("{:?}", iter.next());
+}
+  #+end_src
+
+  #+RESULTS:
+  : Iter([10, 20, 30])
+  : Some(10)
+  : Some(20)
+  : Some(30)
+  : None
+
+  如果一个集合是数组或者 vector 的迭代器，我们可以使用 =for...in= 。
+
+  #+begin_src rust
+fn main() {
+    let a = [10, 20, 30];
+    let iter = a.iter();
+    for data in iter {
+        print!("{}\t", data);
+    }
+}
+  #+end_src
+
+  #+RESULTS:
+  : 10	20	30
+
+- 迭代器内的方法
+
+ | 方法        | 描述         |
+ |-------------+--------------|
+ | iter()      | 返回 &T      |
+ | into_iter() | 返回值类型 T |
+ | iter_mut()  | 返回 &mut T  |
+
+** 闭包
+
+- 闭包语法
+
+  #+begin_src rust
+let closure_function = |param| {
+    // logic
+}
+closure_function(param);
+  #+end_src
+
+使用例：
+
+#+begin_src rust
+fn main() {
+    let is_even = | x | {
+        x % 2 == 0
+    };
+    let no = 13;
+    println!("{} is even ? {}", no, is_even(no));
+}
+#+end_src
+
+#+RESULTS:
+: 13 is even ? false
